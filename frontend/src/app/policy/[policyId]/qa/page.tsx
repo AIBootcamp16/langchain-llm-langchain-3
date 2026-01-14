@@ -7,21 +7,108 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { sendChatMessage } from '@/lib/api';
+import { sendChatMessage, initPolicy, cleanupSession } from '@/lib/api';
 import { useSessionStore } from '@/store/useSessionStore';
 import { routes } from '@/lib/routes';
 import type { ChatMessage } from '@/lib/types';
+
+// Parse citations in answer text
+const parseCitations = (
+  text: string,
+  evidence: any[],
+  policyId: number
+): string => {
+  if (!text) return '';
+  
+  let parsedText = text;
+  
+  // Parse mixed format: [정책문서 X, 웹 Y, Z] → split and process separately
+  parsedText = parsedText.replace(
+    /\[([^\]]+)\]/g,
+    (match, content) => {
+      const parts: string[] = [];
+      
+      // Check if it contains "정책문서"
+      const policyMatch = content.match(/정책문서\s*([\d,\s]+)/);
+      if (policyMatch) {
+        const nums = policyMatch[1].split(',').map((n: string) => n.trim()).filter(Boolean);
+        const links = nums.map((num: string) => {
+          return `<a href="/policy/${policyId}" class="inline-flex items-center gap-1 text-primary font-semibold hover:underline cursor-pointer">
+            <span class="material-symbols-outlined text-[14px]">article</span>정책문서 ${num}
+          </a>`;
+        }).join(', ');
+        parts.push(links);
+      }
+      
+      // Check if it contains "웹"
+      const webMatch = content.match(/웹\s*([\d,\s]+)/);
+      if (webMatch) {
+        const nums = webMatch[1].split(',').map((n: string) => parseInt(n.trim()) - 1).filter(n => !isNaN(n));
+        const links = nums.map((idx: number) => {
+          const webEvidence = evidence.filter(e => e.type === 'web')[idx];
+          if (webEvidence && webEvidence.url) {
+            return `<a href="${webEvidence.url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-green-600 font-semibold hover:underline cursor-pointer">
+              <span class="material-symbols-outlined text-[14px]">language</span>웹 ${idx + 1}
+            </a>`;
+          }
+          return `웹 ${idx + 1}`;
+        }).join(', ');
+        parts.push(links);
+      }
+      
+      // If no matches found, return original
+      if (parts.length === 0) {
+        return match;
+      }
+      
+      return `[${parts.join(', ')}]`;
+    }
+  );
+  
+  return parsedText;
+};
 
 export default function PolicyQAPage() {
   const params = useParams();
   const router = useRouter();
   const policyId = Number(params.policyId);
   
-  const { sessionId, setSessionId } = useSessionStore();
+  const { sessionId, setSessionId, generateSessionId } = useSessionStore();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
+  const [policyInitialized, setPolicyInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // 페이지 로드 시 정책 문서 캐시 초기화
+  useEffect(() => {
+    const initializePolicyCache = async () => {
+      try {
+        // 세션 ID가 없으면 생성
+        const currentSessionId = sessionId || generateSessionId();
+        if (!sessionId) {
+          setSessionId(currentSessionId);
+        }
+        
+        // 정책 문서를 캐시에 로드
+        await initPolicy(currentSessionId, policyId);
+        setPolicyInitialized(true);
+        console.log('Policy documents initialized in cache');
+      } catch (error) {
+        console.error('Failed to initialize policy cache:', error);
+      }
+    };
+    
+    initializePolicyCache();
+    
+    // 언마운트 시 캐시 정리
+    return () => {
+      if (sessionId) {
+        cleanupSession(sessionId).catch(console.error);
+        console.log('Cache cleaned up on unmount');
+      }
+    };
+  }, [policyId]); // policyId가 변경되면 재실행
   
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -151,19 +238,15 @@ export default function PolicyQAPage() {
                         : 'bg-[#f0f4f3] dark:bg-[#2d3235] text-[#111817] dark:text-[#f9fafa] rounded-2xl rounded-tl-none border border-[#e0e7e6] dark:border-[#3a3f42]'
                     } px-5 py-4 shadow-sm`}
                   >
-                    <p className="text-[15px] leading-relaxed">{msg.content}</p>
-                    {msg.evidence && msg.evidence.length > 0 && (
-                      <div className="mt-4 space-y-2">
-                        {msg.evidence.map((ev, i) => (
-                          <button
-                            key={i}
-                            className="flex items-center gap-1.5 bg-white dark:bg-[#23272a] px-3 py-1.5 rounded-lg border border-primary/20 text-primary text-xs font-bold hover:bg-primary/5 transition-colors shadow-sm"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">database</span>
-                            [근거 {i + 1}]
-                          </button>
-                        ))}
-                      </div>
+                    {msg.role === 'assistant' ? (
+                      <div 
+                        className="text-[15px] leading-relaxed"
+                        dangerouslySetInnerHTML={{
+                          __html: parseCitations(msg.content, msg.evidence || [], policyId)
+                        }}
+                      />
+                    ) : (
+                      <p className="text-[15px] leading-relaxed">{msg.content}</p>
                     )}
                   </div>
                 </div>

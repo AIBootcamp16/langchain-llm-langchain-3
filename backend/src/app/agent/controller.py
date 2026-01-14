@@ -7,12 +7,15 @@ from typing import Dict, Any, List
 import uuid
 
 from ..config.logger import get_logger
-from ..db.engine import get_db
-from ..db.repositories import SessionRepository
-from ..db.models import WorkflowTypeEnum, RoleEnum
+from ..cache import get_chat_cache
+# DB 관련 import는 유지 (추후 필요 시 재사용 가능)
+# from ..db.engine import get_db
+# from ..db.repositories import SessionRepository
+# from ..db.models import WorkflowTypeEnum, RoleEnum
 from .workflows import run_qa_workflow
 
 logger = get_logger()
+chat_cache = get_chat_cache()
 
 
 class AgentController:
@@ -32,7 +35,7 @@ class AgentController:
         Q&A 워크플로우 실행
         
         Args:
-            session_id: 세션 ID (없으면 새로 생성)
+            session_id: 세션 ID
             policy_id: 정책 ID
             user_message: 사용자 메시지
         
@@ -40,42 +43,26 @@ class AgentController:
             Dict: 실행 결과
         """
         try:
-            # Get or create session
-            with get_db() as db:
-                session_repo = SessionRepository(db)
-                
-                # Check if session exists
-                session = session_repo.get_by_id(session_id)
-                
-                if not session:
-                    # Create new session
-                    logger.info(
-                        "Creating new Q&A session",
-                        extra={"session_id": session_id, "policy_id": policy_id}
-                    )
-                    session = session_repo.create(
-                        session_id=session_id,
-                        workflow_type=WorkflowTypeEnum.QA,
-                        policy_id=policy_id
-                    )
-                
-                # Get chat history
-                messages = []
-                chat_history = session_repo.get_chat_history(session_id, limit=10)
-                for chat in chat_history:
-                    messages.append({
-                        "role": chat.role.value,
-                        "content": chat.content
-                    })
-                
-                # Add user message to history
-                session_repo.add_chat_message(
-                    session_id=session_id,
-                    role=RoleEnum.USER,
-                    content=user_message
-                )
+            # 캐시에서 대화 이력 조회 (DB 대신 메모리 캐시 사용)
+            messages = chat_cache.get_chat_history(session_id)
             
-            # Run workflow
+            logger.info(
+                "Running Q&A workflow",
+                extra={
+                    "session_id": session_id,
+                    "policy_id": policy_id,
+                    "history_messages": len(messages)
+                }
+            )
+            
+            # 사용자 메시지를 캐시에 추가
+            chat_cache.add_message(
+                session_id=session_id,
+                role="user",
+                content=user_message
+            )
+            
+            # 워크플로우 실행
             result = run_qa_workflow(
                 session_id=session_id,
                 policy_id=policy_id,
@@ -83,19 +70,20 @@ class AgentController:
                 messages=messages
             )
             
-            # Save assistant response
-            with get_db() as db:
-                session_repo = SessionRepository(db)
-                session_repo.add_chat_message(
-                    session_id=session_id,
-                    role=RoleEnum.ASSISTANT,
-                    content=result.get("answer", ""),
-                    metadata={
-                        "evidence": result.get("evidence", []),
-                        "retrieved_docs_count": len(result.get("retrieved_docs", [])),
-                        "web_sources_count": len(result.get("web_sources", []))
-                    }
-                )
+            # 어시스턴트 응답을 캐시에 저장
+            chat_cache.add_message(
+                session_id=session_id,
+                role="assistant",
+                content=result.get("answer", "")
+            )
+            
+            logger.info(
+                "Q&A workflow completed",
+                extra={
+                    "session_id": session_id,
+                    "has_answer": bool(result.get("answer"))
+                }
+            )
             
             return {
                 "session_id": session_id,
@@ -126,7 +114,10 @@ class AgentController:
     @staticmethod
     def reset_session(session_id: str) -> bool:
         """
-        세션 초기화
+        세션 초기화 (현재는 사용하지 않음 - API 레벨에서 직접 캐시 정리)
+        
+        Note: DB 저장을 하지 않으므로 이 메서드는 현재 사용하지 않습니다.
+        캐시 정리는 routes_chat.py의 /session/reset 엔드포인트에서 직접 수행합니다.
         
         Args:
             session_id: 세션 ID
@@ -135,9 +126,17 @@ class AgentController:
             bool: 성공 여부
         """
         try:
-            with get_db() as db:
-                session_repo = SessionRepository(db)
-                return session_repo.delete(session_id)
+            # 캐시 정리 (API 레벨에서 직접 처리하므로 여기서는 생략)
+            # chat_cache.clear_session(session_id)
+            # policy_cache.clear_policy_context(session_id)
+            
+            # DB 저장을 하지 않으므로 DB 삭제도 불필요
+            # with get_db() as db:
+            #     session_repo = SessionRepository(db)
+            #     return session_repo.delete(session_id)
+            
+            return True
+            
         except Exception as e:
             logger.error(
                 "Error resetting session",

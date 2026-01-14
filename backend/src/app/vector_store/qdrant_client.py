@@ -264,6 +264,71 @@ class QdrantManager:
             )
             raise
     
+    def get_all_documents(
+        self,
+        filter_dict: Optional[Dict[str, Any]] = None,
+        limit: int = 1000
+    ) -> List[Dict[str, Any]]:
+        """
+        필터링된 모든 문서 조회 (벡터 검색 없이 필터만 사용)
+        
+        공고 선택 시 해당 정책의 모든 문서를 가져오기 위해 사용
+        
+        Args:
+            filter_dict: 필터 조건 (예: {"policy_id": 1})
+            limit: 최대 반환 개수 (기본: 1000)
+        
+        Returns:
+            List[Dict]: 문서 리스트
+        """
+        try:
+            # Build filter
+            query_filter = None
+            if filter_dict:
+                conditions = [
+                    FieldCondition(
+                        key=key,
+                        match=MatchValue(value=value)
+                    )
+                    for key, value in filter_dict.items()
+                ]
+                query_filter = Filter(must=conditions)
+            
+            # Scroll (벡터 검색 없이 필터링만)
+            results, _ = self.client.scroll(
+                collection_name=self.collection_name,
+                scroll_filter=query_filter,
+                limit=limit,
+                with_payload=True,
+                with_vectors=False  # 벡터는 불필요
+            )
+            
+            # Format results
+            formatted_results = []
+            for point in results:
+                formatted_results.append({
+                    "id": point.id,
+                    "payload": point.payload
+                })
+            
+            logger.info(
+                "Documents retrieved without vector search",
+                extra={
+                    "filter": filter_dict,
+                    "count": len(formatted_results)
+                }
+            )
+            
+            return formatted_results
+            
+        except Exception as e:
+            logger.error(
+                "Error getting all documents",
+                extra={"error": str(e), "filter": filter_dict},
+                exc_info=True
+            )
+            raise
+    
     def get_collection_info(self) -> Dict[str, Any]:
         """
         컬렉션 정보 조회

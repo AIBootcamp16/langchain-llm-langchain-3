@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     
     # OpenAI
     openai_api_key: str
-    openai_model: str = "gpt-4"
+    openai_model: str = "gpt-4o-mini"  # 128K context, 저렴한 비용
     openai_temperature: float = 0.0
     
     # Embedding Model
