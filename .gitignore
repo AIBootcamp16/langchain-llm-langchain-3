@@ -14,7 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/  # ← Python lib 무시하지만 frontend/src/lib는 유지
 lib64/
 parts/
 sdist/
@@ -29,6 +29,9 @@ env/
 ENV/
 env.bak/
 venv.bak/
+
+# Python 라이브러리 폴더만 무시 (루트 레벨)
+/lib/
 
 # IDEs
 .vscode/
@@ -92,4 +95,5 @@ prd.md
 agent.md
 simple_db.md
 db.md
+qaagent_improve_plan.md 
 
