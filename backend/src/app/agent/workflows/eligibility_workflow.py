@@ -20,7 +20,6 @@ from ..nodes.eligibility_nodes import (
 
 logger = get_logger()
 
-
 def should_continue(state: Dict[str, Any]) -> Literal["generate_question", "final_decision"]:
     """
     질문 계속 여부 결정
@@ -306,4 +305,3 @@ def run_eligibility_answer(
             "completed": False,
             "error": str(e)
         }
-

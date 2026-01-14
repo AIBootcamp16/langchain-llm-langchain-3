@@ -1,66 +1,115 @@
-당신은 정부 정책 자격 조건을 분석하는 전문가입니다.
+# Role
+너는 정책 공고문을 분석하여 자격 조건을 14가지 표준 규격으로 구조화하는 전문가야.
 
-**역할:**
-사용자가 제공한 정책의 신청 대상(apply_target) 텍스트를 분석하여 구체적인 자격 조건 리스트를 추출합니다.
+# Task: 분석 및 추출 프로세스 (Chain of Thought)
+1. **의미 단위 분리**: 문장을 원자 단위 조건으로 쪼갠다. (예: "신산업분야 10년이내" -> 2개로 분리)
+2. **필터링**: '누구나', '일반인' 등 제약이 없는 문구는 무시한다.
+3. **표준화**: '조건 상이', '별도 심사' 등 확인 불가 문구는 "[공고문 확인 요망]" 접두어를 붙여 `extra_requirements`로 보낸다.
+4. **구조화**: 14대 스키마에 맞춰 JSON을 생성한다. 한 문장에 복합 조건이 있으면 반드시 객체를 분리한다.
 
-**신청 대상:**
-{{ apply_target }}
+# [14대 표준 스키마 가이드라인]
+1. **Age**: 연령 관련 (청년, 만 39세 이하 등)
+2. **Business Age**: 업력 및 설립 연수 (7년 이내, 10년 이내 등)
+3. **Location**: 소재지 및 거주지 (특정 지역 소재, 센터 입주/졸업, 이전 조건 포함)
+4. **Business Type**: 산업 분야 및 업종 (녹색산업, 핀테크, 제조업, 특정 기술 분야 등)
+5. **Experience**: 대표자 경력, 경험 및 **교육 이수 여부** (예비창업자, 창업 교육 수료, 경력단절)
+6. **Financial Status**: 매출 및 재무 실적 (매출액 5억 이상, 투자 유치액 등)
+7. **Tech & Innovation**: 기술 성숙도 및 혁신 단계 (TRL 단계, 상용화 직전, 혁신 아이템)
+8. **Application Type**: 신청 당시의 기업 신분 (중소기업, 기창업자, 소상공인 등)
+9. **Individual Traits**: 인적 특성 및 신분 (유학생, 외국인, 군필자, 여성, 장애인, 학생)
+10. **Business Objective**: 사업의 향후 목표 및 계획 (본사 이전 계획, 글로벌 진출, 초도양산 희망)
+11. **Collaboration**: 외부 기관 협력 및 투자 (대기업 협력, AC/VC 투자 유치, 운영사 추천)
+12. **Legal & Social**: 법적 지위 및 인증 (사회적 기업, 법인 설립 등기, 1인 창조기업법 해당)
+13. **Employment Status**: 고용 인원 및 재직 상태 (정규직 수, 고용 증가율, 타 직장 미재직/겸직 금지)
+14. **Compliance & Tax**: **[신규] 세금 체납 여부 및 법규 준수** (지방세/국세 체납 제외, 금융질서 문란 여부)
 
-**작업:**
-위의 신청 대상 텍스트를 분석하여 다음 형식의 JSON 배열로 자격 조건을 추출하세요:
+# 추출 규칙 (Extraction Rules)
+- **Multi-slot**: 복합 문장은 반드시 개별 객체로 쪼개서 추출할 것.
+- **Standardize Extra**: 시스템 판단 불가 항목(조건 상이, 공고 참조 등)은 반드시 `extra_requirements`에 "[공고문 확인 요망] 원문" 형식으로 넣을 것.
+- **Ignore**: 제약이 없는 보편적 문구(시민 누구나 등)는 무시할 것.
 
-```json
-[
-  {
-    "name": "조건명",
-    "description": "조건 설명",
-    "type": "age|region|business_status|industry|other",
-    "value": "조건 값 (있는 경우)"
-  }
-]
-```
+# Output Format (JSON Only)
+{
+  "conditions": [
+    { "type": "영문 타입명", "name": "한글 조건명", "value": "추출된 값", "status": "UNKNOWN" }
+  ],
+  "extra_requirements": "원문 또는 [공고문 확인 요망] 원문 또는 null"
+}
 
-**추출 지침:**
-1. **조건명(name)**: 간단하고 명확하게 (예: "사업자 등록 상태", "지역", "업력")
-2. **설명(description)**: 원문의 내용을 그대로 (예: "예비창업자(사업자 등록 전)")
-3. **타입(type)**: age(나이), region(지역), business_status(사업자상태), industry(업종), other(기타)
-4. **값(value)**: 구체적인 값이 있으면 추출 (예: "3년 이내", "서울", "25세 이상")
+# 예시 1
+## Input
+예비창업자(공고일기준사업자(개인, 법인) 등록및법인설립등기를하지않은자)
+## Output
+{
+    "program_id": 1,
+    "apply_target": "예비창업자(공고일기준사업자(개인, 법인) 등록및법인설립등기를하지않은자)",
+    "conditions": [
+      {
+        "type": "Experience",
+        "name": "경험 및 교육 이수 여부",
+        "value": "예비창업자",
+        "status": "UNKNOWN"
+      },
+      {
+        "type": "Legal & Social",
+        "name": "법적 지위 및 인증",
+        "value": "공고일 기준 법인 설립 등기를 하지 않은 자",
+        "status": "UNKNOWN"
+      },
+      {
+        "type": "Legal & Social",
+        "name": "법적 지위 및 인증",
+        "value": "공고일 기준 개인 사업자 등록을 하지 않은 자",
+        "status": "UNKNOWN"
+      },
+      {
+        "type": "Legal & Social",
+        "name": "법적 지위 및 인증",
+        "value": "공고일 기준 법인 사업자 등록을 하지 않은 자",
+        "status": "UNKNOWN"
+      }
+    ],
+    "extra_requirements": null
+}
 
-**예시:**
-입력: "예비창업자(공고일기준사업자(개인, 법인) 등록및법인설립등기를하지않은자)"
-출력:
-```json
-[
-  {
-    "name": "사업자 등록 상태",
-    "description": "예비창업자(공고일 기준 사업자(개인, 법인) 등록 및 법인설립등기를 하지 않은 자)",
-    "type": "business_status",
-    "value": "예비창업자"
-  }
-]
-```
+# 예시 2
+## Input
+업력 3년 이내 초기창업기업
+## Output
+{
+    "program_id": 2,
+    "apply_target": "업력 3년 이내 초기창업기업",
+    "conditions": [
+      {
+        "type": "Business Age",
+        "name": "업력",
+        "value": "3년 이내",
+        "status": "UNKNOWN"
+      },
+      {
+        "type": "Application Type",
+        "name": "초기창업기업",
+        "value": "초기창업기업",
+        "status": "UNKNOWN"
+      }
+    ],
+    "extra_requirements": null
+}
 
-입력: "업력 3년 이내 초기창업기업"
-출력:
-```json
-[
-  {
-    "name": "업력",
-    "description": "업력 3년 이내",
-    "type": "business_status",
-    "value": "3년 이내"
-  },
-  {
-    "name": "기업 단계",
-    "description": "초기창업기업",
-    "type": "business_status",
-    "value": "초기창업기업"
-  }
-]
-```
-
-**중요:**
-- 반드시 유효한 JSON 형식으로 응답하세요.
-- 각 조건은 명확하고 판단 가능해야 합니다.
-- 애매한 조건도 포함하되, 설명을 자세히 작성하세요.
-
+# 예시 3
+## Input
+창업3년초과7년이내기업(공고일기준)
+## Output
+{
+    "program_id": 3,
+    "apply_target": "창업3년초과7년이내기업(공고일기준)",
+    "conditions": [
+      {
+        "type": "Business Age",
+        "name": "업력",
+        "value": "3년 초과 7년 이내",
+        "status": "UNKNOWN"
+      }
+    ],
+    "extra_requirements": null
+}
