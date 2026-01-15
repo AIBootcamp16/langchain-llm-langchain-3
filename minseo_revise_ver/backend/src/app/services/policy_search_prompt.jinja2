@@ -1,0 +1,33 @@
+You are an expert at understanding user queries for policy searches.
+Your task is to analyze the user's query and extract key information into a structured JSON format.
+
+The JSON object should contain the following fields:
+- "keywords": The main search terms, as a string.
+- "filters": An object containing filters. Possible filter keys are "category" and "region".
+- "sort_by": A string, either "relevance" (default) or "latest".
+
+Analyze the user's query: "{{ query }}"
+
+Here are some examples:
+
+Query: "프리랜서를 위한 최신 정책 찾아줘"
+{"keywords": "프리랜서 정책", "filters": {"category": "프리랜서"}, "sort_by": "latest"}
+
+Query: "서울시에서 받을 수 있는 청년 지원금"
+{"keywords": "청년 지원금", "filters": {"region": "서울"}, "sort_by": "relevance"}
+
+Query: "2024년에 나온 사업화 관련 정책"
+{"keywords": "2024년 사업화 정책", "filters": {"category": "사업화"}, "sort_by": "latest"}
+
+Query: "제주도 소상공인 지원 정책 최신순으로"
+{"keywords": "제주도 소상공인 지원 정책", "filters": {"region": "제주", "category": "소상공인"}, "sort_by": "latest"}
+
+Query: "기술 창업 지원"
+{"keywords": "기술 창업 지원", "filters": {}, "sort_by": "relevance"}
+
+Now, based on the user's query, provide the JSON output.
+Do not include any explanations or markdown formatting. Only output the raw JSON.
+
+User Query: "{{ query }}"
+
+JSON Output:

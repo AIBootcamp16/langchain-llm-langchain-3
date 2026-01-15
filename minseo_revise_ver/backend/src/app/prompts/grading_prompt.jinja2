@@ -1,0 +1,20 @@
+You are a grader assessing the relevance of a retrieved policy document to a user query.
+
+User Query: {{ query }}
+
+Retrieved Policy:
+Title: {{ policy.program_name }}
+Overview: {{ policy.program_overview }}
+Target: {{ policy.apply_target }}
+
+Does this policy document contain information relevant to the user's query?
+If the policy is relevant to the query, output "yes".
+If the policy is not relevant or does not address the query, output "no".
+
+Output Format (JSON):
+{
+    "score": "yes" or "no",
+    "reason": "brief explanation"
+}
+
+Ensure the output is valid JSON.

@@ -1,0 +1,334 @@
+# =============================================================================
+# Python / Backend
+# =============================================================================
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / Packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# =============================================================================
+# Node.js / Frontend
+# =============================================================================
+
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Production
+/build
+/.next
+/out
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env files
+.env*.local
+.env
+.env.production
+.env.development
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# =============================================================================
+# Environment Variables & Secrets
+# =============================================================================
+
+# Environment files (keep .env.example)
+.env
+.env.*
+!.env.example
+.env.bak
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# API Keys & Secrets
+*.key
+*.pem
+secrets/
+.secrets
+
+# =============================================================================
+# Database & Data Files
+# =============================================================================
+
+# MySQL Dumps
+# 주의: mysql_dump.sql은 약 966KB로 작지만, 민감한 데이터가 포함될 수 있습니다.
+# 필요시 별도 저장소나 Git LFS 사용을 고려하세요.
+mysql_dump.sql
+mysql_dump_clean.sql
+*.sql.bak
+
+# Qdrant Storage (84MB - 큰 파일이므로 제외, 필요시 Git LFS 또는 별도 저장소 사용)
+qdrant_storage_backup/
+qdrant_storage.tar.gz
+qdrant_storage/
+*.qdrant
+
+# Large Data Files
+# 주의: data.json은 약 716KB로 작지만, 필요시 제외할 수 있습니다.
+# 포함하려면 아래 줄을 주석 처리하세요.
+# data.json
+*.json.bak
+*.csv
+*.xlsx
+*.xls
+
+# =============================================================================
+# IDE & Editors
+# =============================================================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA / PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# OS Files
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Logs & Temporary Files
+# =============================================================================
+
+# Logs
+*.log
+logs/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.bak
+*.backup
+*~
+
+# =============================================================================
+# Docker
+# =============================================================================
+
+# Docker volumes (if mounted locally)
+docker-volumes/
+
+# =============================================================================
+# Project Specific
+# =============================================================================
+
+# Report files (개발 중 생성된 리포트 파일)
+*.md.bak
+report.md
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# =============================================================================
+# LangSmith / Observability
+# =============================================================================
+
+# LangSmith cache
+.langsmith/
+
+# =============================================================================
+# Testing
+# =============================================================================
+
+# Test outputs
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+test-results/
+test-reports/
+
+# =============================================================================
+# Build Artifacts
+# =============================================================================
+
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Archives
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# =============================================================================
+# Keep These Files
+# =============================================================================
+
+# Keep example files
+!env.example
+!.env.example
+!*.example
+
+# Keep documentation
+!README.md
+!*.md
+!docs/
+
+# Keep configuration templates
+!*.example.*
+!*.template.*
