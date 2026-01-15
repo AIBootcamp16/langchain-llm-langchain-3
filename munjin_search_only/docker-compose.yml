@@ -1,0 +1,119 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: policy_mysql
+    restart: unless-stopped
+    volumes:
+      - ./infra/mysql/init:/docker-entrypoint-initdb.d
+      - ./infra/mysql:/etc/mysql/conf.d
+      - mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"  # 로컬 3306 포트 충돌 회피
+    networks:
+      - policy_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: policy_qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    ports:
+      - "6335:6333"  # 기존 Qdrant 포트 충돌 회피
+      - "6336:6334"
+    networks:
+      - policy_network
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 10s bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  adminer:
+    image: adminer:latest
+    container_name: policy_adminer
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+    networks:
+      - policy_network
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../infra/cloudtype/backend.Dockerfile
+    container_name: policy_backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: ${DATABASE_URL}
+      
+      # Qdrant
+      QDRANT_URL: ${QDRANT_URL}
+      QDRANT_COLLECTION: ${QDRANT_COLLECTION}
+      
+      # OpenAI
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      
+      # Embedding Model
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL}
+      
+      # Web Search
+      TAVILY_API_KEY: ${TAVILY_API_KEY}
+      
+      # LangSmith
+      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY}
+      LANGSMITH_PROJECT: ${LANGSMITH_PROJECT}
+      LANGSMITH_TRACING: ${LANGSMITH_TRACING}
+      LANGSMITH_ENDPOINT: ${LANGSMITH_ENDPOINT}
+      # LangChain tracing envs (ensure tracing is enabled at process start)
+      LANGCHAIN_TRACING_V2: "true"
+      LANGCHAIN_API_KEY: ${LANGSMITH_API_KEY}
+      LANGCHAIN_PROJECT: ${LANGSMITH_PROJECT}
+      LANGCHAIN_ENDPOINT: ${LANGSMITH_ENDPOINT}
+      
+      # Application
+      ENVIRONMENT: ${ENVIRONMENT}
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    networks:
+      - policy_network
+    volumes:
+      - ./backend/src:/app/src
+      # - ./data.json:/app/data.json # wsl 문제로 주석처리
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mysql_data:
+    driver: local
+  qdrant_data:
+    driver: local
+
+networks:
+  policy_network:
+    driver: bridge
