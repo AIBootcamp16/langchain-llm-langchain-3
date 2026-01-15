@@ -12,7 +12,7 @@
 2. **Business Age**: 업력 및 설립 연수 (7년 이내, 10년 이내 등)
 3. **Location**: 소재지 및 거주지 (특정 지역 소재, 센터 입주/졸업, 이전 조건 포함)
 4. **Business Type**: 산업 분야 및 업종 (녹색산업, 핀테크, 제조업, 특정 기술 분야 등)
-5. **Experience**: 대표자 경력, 경험 및 **교육 이수 여부** (예비창업자, 창업 교육 수료, 경력단절)
+5. **Experience**: 대표자 경력, 경험 및 교육 이수 여부 (예비창업자, 창업 교육 수료, 경력단절)
 6. **Financial Status**: 매출 및 재무 실적 (매출액 5억 이상, 투자 유치액 등)
 7. **Tech & Innovation**: 기술 성숙도 및 혁신 단계 (TRL 단계, 상용화 직전, 혁신 아이템)
 8. **Application Type**: 신청 당시의 기업 신분 (중소기업, 기창업자, 소상공인 등)
@@ -21,14 +21,14 @@
 11. **Collaboration**: 외부 기관 협력 및 투자 (대기업 협력, AC/VC 투자 유치, 운영사 추천)
 12. **Legal & Social**: 법적 지위 및 인증 (사회적 기업, 법인 설립 등기, 1인 창조기업법 해당)
 13. **Employment Status**: 고용 인원 및 재직 상태 (정규직 수, 고용 증가율, 타 직장 미재직/겸직 금지)
-14. **Compliance & Tax**: **[신규] 세금 체납 여부 및 법규 준수** (지방세/국세 체납 제외, 금융질서 문란 여부)
+14. **Compliance & Tax**: 세금 체납 여부 및 법규 준수 (지방세/국세 체납 제외, 금융질서 문란 여부)
 
-# 추출 규칙 (Extraction Rules)
-- **Multi-slot**: 복합 문장은 반드시 개별 객체로 쪼개서 추출할 것.
-- **Standardize Extra**: 시스템 판단 불가 항목(조건 상이, 공고 참조 등)은 반드시 `extra_requirements`에 "[공고문 확인 요망] 원문" 형식으로 넣을 것.
-- **Ignore**: 제약이 없는 보편적 문구(시민 누구나 등)는 무시할 것.
+# Instruction: Strict JSON Output Rules (필독)
+- **응답의 처음부터 끝까지 오직 JSON 객체 하나만 출력하세요.**
+- 인사말, 설명, 마크다운 코드 블록(```json)을 절대 포함하지 마세요.
+- JSON 파싱 에러를 유발하는 줄바꿈 문자(\n)나 특수 문자를 값 내부에서 주의해서 다루세요.
 
-# Output Format (JSON Only)
+# Output Format
 {
   "conditions": [
     { "type": "영문 타입명", "name": "한글 조건명", "value": "추출된 값", "status": "UNKNOWN" }
@@ -36,80 +36,5 @@
   "extra_requirements": "원문 또는 [공고문 확인 요망] 원문 또는 null"
 }
 
-# 예시 1
-## Input
-예비창업자(공고일기준사업자(개인, 법인) 등록및법인설립등기를하지않은자)
-## Output
-{
-    "program_id": 1,
-    "apply_target": "예비창업자(공고일기준사업자(개인, 법인) 등록및법인설립등기를하지않은자)",
-    "conditions": [
-      {
-        "type": "Experience",
-        "name": "경험 및 교육 이수 여부",
-        "value": "예비창업자",
-        "status": "UNKNOWN"
-      },
-      {
-        "type": "Legal & Social",
-        "name": "법적 지위 및 인증",
-        "value": "공고일 기준 법인 설립 등기를 하지 않은 자",
-        "status": "UNKNOWN"
-      },
-      {
-        "type": "Legal & Social",
-        "name": "법적 지위 및 인증",
-        "value": "공고일 기준 개인 사업자 등록을 하지 않은 자",
-        "status": "UNKNOWN"
-      },
-      {
-        "type": "Legal & Social",
-        "name": "법적 지위 및 인증",
-        "value": "공고일 기준 법인 사업자 등록을 하지 않은 자",
-        "status": "UNKNOWN"
-      }
-    ],
-    "extra_requirements": null
-}
-
-# 예시 2
-## Input
-업력 3년 이내 초기창업기업
-## Output
-{
-    "program_id": 2,
-    "apply_target": "업력 3년 이내 초기창업기업",
-    "conditions": [
-      {
-        "type": "Business Age",
-        "name": "업력",
-        "value": "3년 이내",
-        "status": "UNKNOWN"
-      },
-      {
-        "type": "Application Type",
-        "name": "초기창업기업",
-        "value": "초기창업기업",
-        "status": "UNKNOWN"
-      }
-    ],
-    "extra_requirements": null
-}
-
-# 예시 3
-## Input
-창업3년초과7년이내기업(공고일기준)
-## Output
-{
-    "program_id": 3,
-    "apply_target": "창업3년초과7년이내기업(공고일기준)",
-    "conditions": [
-      {
-        "type": "Business Age",
-        "name": "업력",
-        "value": "3년 초과 7년 이내",
-        "status": "UNKNOWN"
-      }
-    ],
-    "extra_requirements": null
-}
+# Target Text to Analyze
+{{ apply_target }}

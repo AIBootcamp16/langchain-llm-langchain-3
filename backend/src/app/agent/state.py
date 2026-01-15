@@ -34,28 +34,26 @@ class QAState(TypedDict):
     error: Optional[str]
 
 
+# backend/src/app/agent/state.py
+
 class EligibilityState(TypedDict):
     """
     자격 확인 워크플로우 상태 (Phase 4)
-    
-    Attributes:
-        session_id: 세션 ID
-        policy_id: 정책 ID
-        apply_target: 신청 대상 텍스트
-        conditions: 조건 리스트
-        user_slots: 사용자 입력 슬롯
-        current_question: 현재 질문
-        current_condition_index: 현재 조건 인덱스
-        final_result: 최종 결과
-        reason: 판정 사유
     """
     session_id: str
     policy_id: int
-    apply_target: str
-    conditions: List[Dict[str, Any]]  # {"name": str, "description": str, "status": "UNKNOWN/PASS/FAIL"}
-    user_slots: Dict[str, Any]  # {"age": 25, "region": "서울", ...}
+    apply_target: str  # 정책 신청 대상 원문 [cite: 31-32]
+    conditions: List[Dict[str, Any]]  # 추출된 14대 조건 리스트 [cite: 34-37, 47-57]
+    extra_requirements: Optional[str]  # [공고문 확인 요망] 항목들 [cite: 73, 77-79]
+    
+    # UI 체크리스트용 필드 추가 [cite: 192-193]
+    checklist: List[Dict[str, Any]]  # UI에 보여줄 항목들
+    checklist_result: List[Dict[str, Any]]  # UI에서 선택된 결과 (PASS/FAIL/UNKNOWN) [cite: 222-227]
+    
+    user_slots: Dict[str, Any]
     current_question: str
     current_condition_index: int
-    final_result: Literal["ELIGIBLE", "NOT_ELIGIBLE", "PARTIALLY"]
+    
+    # 판정 결과 리터럴 고도화 [cite: 40, 271-275]
+    final_result: Literal["ELIGIBLE", "NOT_ELIGIBLE", "CANNOT_DETERMINE"]
     reason: str
-

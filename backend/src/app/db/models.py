@@ -217,7 +217,7 @@ class ChecklistResult(Base):
     condition_name = Column(String(255), comment="조건명")
     condition_value = Column(Text, comment="조건 값")
     user_value = Column(Text, comment="사용자 값")
-    result = Column(Enum(ResultEnum), nullable=False, comment="판정 결과")
+    result = Column(String(50), nullable=False, comment="판정 결과 (ELIGIBLE, PASS 등)")    
     reason = Column(Text, comment="판정 사유")
     created_at = Column(DateTime, default=datetime.utcnow, comment="생성일")
     
