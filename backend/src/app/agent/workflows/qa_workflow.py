@@ -87,7 +87,7 @@ def create_qa_workflow() -> StateGraph:
     START → classify_query_type
                ↓
         [WEB_ONLY] ──────────────→ web_search_for_link → generate_answer_web_only → END
-               ↓
+                                                      ↓
         [POLICY_QA]
                ↓
         load_cached_docs (캐시에서 문서 조회, Qdrant 검색 없음!)
@@ -95,7 +95,7 @@ def create_qa_workflow() -> StateGraph:
         check_sufficiency
                ↓
         [sufficient] → generate_answer_with_docs → END
-               ↓
+                                      ↓
         [insufficient] → web_search_supplement → generate_answer_hybrid → END
     
     Returns:

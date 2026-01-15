@@ -45,6 +45,7 @@ class PolicyCache:
         """
         with self._lock:
             self._cache[session_id] = {
+                "type": "policy",
                 "policy_id": policy_id,
                 "policy_info": policy_info,
                 "documents": documents,
@@ -58,6 +59,64 @@ class PolicyCache:
                     "session_id": session_id,
                     "policy_id": policy_id,
                     "documents_count": len(documents)
+                }
+            )
+    
+    def set_web_context(
+        self,
+        session_id: str,
+        web_id: str,
+        web_info: Dict[str, Any],
+        content: str
+    ):
+        """
+        웹 공고 선택 시 컨텍스트 캐시에 저장
+        
+        Args:
+            session_id: 세션 ID
+            web_id: 웹 공고 고유 ID
+            web_info: 웹 공고 정보 (title, url, source 등)
+            content: 웹 공고 본문 내용
+        """
+        with self._lock:
+            # 웹 공고 내용을 문서 형식으로 변환
+            url = web_info.get("url", "")
+            documents = [
+                {
+                    "content": content,
+                    "doc_type": "web_content",
+                    "score": 1.0,
+                    "source": url,  # 출처 URL
+                    "url": url       # 명시적 URL 필드 추가
+                }
+            ]
+            
+            logger.info(
+                "Web context being cached",
+                extra={
+                    "session_id": session_id,
+                    "web_id": web_id,
+                    "content_length": len(content),
+                    "content_preview": content[:200] if content else "[EMPTY]"
+                }
+            )
+            
+            self._cache[session_id] = {
+                "type": "web",
+                "web_id": web_id,
+                "web_info": web_info,
+                "documents": documents,
+                "cached_at": datetime.now().isoformat()
+            }
+            self._timestamps[session_id] = datetime.now()
+            
+            logger.info(
+                "Web context cached",
+                extra={
+                    "session_id": session_id,
+                    "web_id": web_id,
+                    "title": web_info.get("title", ""),
+                    "url": web_info.get("url", "")
                 }
             )
     

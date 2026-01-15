@@ -28,13 +28,26 @@ def check_sufficiency_node(state: Dict[str, Any]) -> Dict[str, Any]:
     try:
         retrieved_docs = state.get("retrieved_docs", [])
         need_web_search = state.get("need_web_search", False)
+        context_type = state.get("context_type", "policy")  # "policy" or "web"
         
         # Already flagged for web search
         if need_web_search:
             logger.info("Web search already flagged by classifier")
             return state
         
-        # Check document count
+        # 웹 컨텍스트인 경우 1개 문서만 있어도 충분
+        if context_type == "web":
+            if len(retrieved_docs) >= 1:
+                logger.info(
+                    "Web context documents sufficient",
+                    extra={"count": len(retrieved_docs), "context_type": "web"}
+                )
+                return {
+                    **state,
+                    "need_web_search": False
+                }
+        
+        # Check document count (정책 문서의 경우)
         if len(retrieved_docs) < 2:
             logger.info(
                 "Insufficient documents retrieved",

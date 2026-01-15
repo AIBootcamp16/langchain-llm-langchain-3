@@ -44,7 +44,8 @@ class TavilySearchClient:
         max_results: int = 5,
         search_depth: str = "advanced",
         include_domains: Optional[List[str]] = None,
-        exclude_domains: Optional[List[str]] = None
+        exclude_domains: Optional[List[str]] = None,
+        days: int = 90  # 최근 90일 이내 결과만
     ) -> List[Dict[str, Any]]:
         """
         Tavily 웹 검색 실행
@@ -55,6 +56,7 @@ class TavilySearchClient:
             search_depth: 검색 깊이 ("basic" 또는 "advanced")
             include_domains: 포함할 도메인 리스트
             exclude_domains: 제외할 도메인 리스트
+            days: 최근 N일 이내 결과만 (기본값: 90일)
         
         Returns:
             List[Dict]: 검색 결과 리스트
@@ -62,6 +64,7 @@ class TavilySearchClient:
                 - url: URL
                 - content: 내용
                 - score: 관련성 점수
+                - published_date: 게시 날짜
         """
         if not self.client:
             logger.error("Tavily client not initialized")
@@ -73,7 +76,8 @@ class TavilySearchClient:
                 extra={
                     "query": query,
                     "max_results": max_results,
-                    "search_depth": search_depth
+                    "search_depth": search_depth,
+                    "days_filter": days
                 }
             )
             
@@ -85,7 +89,8 @@ class TavilySearchClient:
                 include_domains=include_domains,
                 exclude_domains=exclude_domains,
                 include_answer=True,  # Get AI-generated answer
-                include_raw_content=False  # Don't include full HTML
+                include_raw_content=False,  # Don't include full HTML
+                days=days  # 최근 N일 이내 결과만
             )
             
             # Parse results

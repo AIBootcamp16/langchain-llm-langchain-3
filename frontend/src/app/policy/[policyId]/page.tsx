@@ -123,6 +123,24 @@ export default function PolicyDetailPage() {
                     <p className="text-sm text-text-muted">{currentPolicy.support_budget.toLocaleString()}원</p>
                   </div>
                 )}
+                {currentPolicy.announcement_date && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-sm font-semibold text-text-muted mb-2">사업 공고:</p>
+                    <p className="text-sm text-text-muted">{currentPolicy.announcement_date}</p>
+                  </div>
+                )}
+                {currentPolicy.biz_process && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-sm font-semibold text-text-muted mb-2">사업 절차:</p>
+                    <p className="text-sm text-text-muted">{currentPolicy.biz_process}</p>
+                  </div>
+                )}
+                {currentPolicy.required_documents && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-sm font-semibold text-text-muted mb-2">제출 서류:</p>
+                    <p className="text-sm text-text-muted">{currentPolicy.required_documents}</p>
+                  </div>
+                )}
                 {(currentPolicy.apply_method || currentPolicy.application_method) && (
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <p className="text-sm font-semibold text-text-muted mb-2">신청 방법:</p>

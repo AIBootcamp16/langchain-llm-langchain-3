@@ -61,16 +61,20 @@ def load_cached_docs_node(state: Dict[str, Any]) -> Dict[str, Any]:
         # 캐시에서 문서 가져오기 (전체 문서!)
         documents = policy_context.get("documents", [])
         policy_info = policy_context.get("policy_info", {})
+        context_type = policy_context.get("type", "policy")  # "policy" or "web"
         
         # Format documents for LLM
         retrieved_docs = []
         for doc in documents:
-            payload = doc.get("payload", {})
+            payload = doc.get("payload", {}) if isinstance(doc, dict) and "payload" in doc else doc
             retrieved_docs.append({
                 "content": payload.get("content", ""),
                 "doc_type": payload.get("doc_type", ""),
                 "policy_id": payload.get("policy_id"),
-                "chunk_index": payload.get("chunk_index", 0)
+                "chunk_index": payload.get("chunk_index", 0),
+                "score": payload.get("score", 1.0),  # 캐시된 문서는 정책 전체이므로 최고 점수 부여
+                "source": payload.get("source", ""),  # 웹 공고 URL 포함
+                "url": payload.get("url", "")  # URL 필드도 포함
             })
         
         logger.info(
@@ -78,14 +82,16 @@ def load_cached_docs_node(state: Dict[str, Any]) -> Dict[str, Any]:
             extra={
                 "session_id": session_id,
                 "documents_count": len(retrieved_docs),
-                "policy_id": policy_context.get("policy_id")
+                "policy_id": policy_context.get("policy_id"),
+                "context_type": context_type
             }
         )
         
         return {
             **state,
             "retrieved_docs": retrieved_docs,
-            "policy_info": policy_info
+            "policy_info": policy_info,
+            "context_type": context_type  # ✨ 컨텍스트 타입 추가
         }
         
     except Exception as e:

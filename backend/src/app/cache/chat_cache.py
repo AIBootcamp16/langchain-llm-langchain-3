@@ -12,11 +12,11 @@ class ChatCache:
     """
     대화 이력 캐시 (메모리)
     
-    최근 25턴(50개 메시지)만 유지
+    무제한 대화 이력 유지 (브라우저 탭 닫을 때까지)
     """
     
-    MAX_HISTORY_TURNS = 25  # 최근 25턴 유지
-    TTL_SECONDS = 86400     # 24시간 (백업용)
+    MAX_HISTORY_TURNS = None  # 무제한 (None = 제한 없음)
+    TTL_SECONDS = 86400       # 24시간 (백업용)
     
     def __init__(self):
         self._cache: Dict[str, List[Dict]] = {}
@@ -48,7 +48,7 @@ class ChatCache:
         """
         대화 메시지 추가
         
-        최근 25턴(50개 메시지)만 유지
+        무제한 메시지 저장 (세션 종료 시까지)
         
         Args:
             session_id: 세션 ID
@@ -66,10 +66,8 @@ class ChatCache:
                 "timestamp": datetime.now().isoformat()
             })
             
-            # 최근 N턴만 유지 (1턴 = user + assistant = 2개 메시지)
-            max_messages = self.MAX_HISTORY_TURNS * 2
-            if len(self._cache[session_id]) > max_messages:
-                self._cache[session_id] = self._cache[session_id][-max_messages:]
+            # 턴 제한 없음 (무제한 저장)
+            # 브라우저 탭 닫을 때 cleanup API가 호출되어 자동 삭제
             
             # 타임스탬프 업데이트
             self._timestamps[session_id] = datetime.now()

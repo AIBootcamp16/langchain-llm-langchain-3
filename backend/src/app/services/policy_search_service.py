@@ -247,7 +247,8 @@ class PolicySearchService:
     def _web_search(
         self,
         query: str,
-        max_results: int = 5
+        max_results: int = 5,
+        days: int = 90
     ) -> List[PolicyResponse]:
         """
         웹 검색 수행 (Tavily API 사용)
@@ -255,16 +256,18 @@ class PolicySearchService:
         Args:
             query: 검색 쿼리
             max_results: 최대 결과 수
+            days: 최근 N일 이내 결과만 (기본값: 90일)
         
         Returns:
             List[PolicyResponse]: 웹 검색 결과를 PolicyResponse 형식으로 변환
         """
         try:
-            # Tavily 웹 검색 실행
+            # Tavily 웹 검색 실행 (최근 N일 이내 결과만)
             web_results = self.tavily_client.search(
                 query=f"{query} 정부 지원 사업 공고",
                 max_results=max_results,
-                search_depth="advanced"
+                search_depth="advanced",
+                days=days
             )
             
             if not web_results:
@@ -274,6 +277,19 @@ class PolicySearchService:
             # 웹 검색 결과를 PolicyResponse 형식으로 변환
             policy_responses = []
             for idx, result in enumerate(web_results):
+                url = result.get('url', '')
+                
+                # 도메인 추출 (https:// 제거)
+                from urllib.parse import urlparse
+                parsed_url = urlparse(url)
+                domain = parsed_url.netloc or parsed_url.path.split('/')[0]
+                
+                # 스크린샷 URL 생성 - 일단 빈 문자열로 (무료 서비스 불안정)
+                screenshot_url = ""
+                
+                # 파비콘 URL 생성 (도메인만 전달)
+                favicon_url = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
+                
                 # 웹 검색 결과는 실제 정책이 아니므로 특별한 형식으로 변환
                 policy_response = PolicyResponse(
                     id=-1000 - idx,  # 음수 ID로 웹 검색 결과 표시
@@ -289,13 +305,15 @@ class PolicySearchService:
                     apply_target="웹 검색 결과 - 자세한 내용은 출처 링크를 확인하세요",
                     announcement_date=datetime.now().strftime("%Y-%m-%d"),
                     biz_process="",
-                    application_method=f"자세한 내용은 다음 링크를 참고하세요: {result.get('url', '')}",
-                    contact_agency=[result.get("url", "")],
+                    application_method=f"자세한 내용은 다음 링크를 참고하세요: {url}",
+                    contact_agency=[url],
                     contact_number=[],
                     required_documents=[],
                     collected_date=datetime.now().strftime("%Y-%m-%d"),
                     created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    score=result.get("score", 0.5)
+                    score=result.get("score", 0.5),
+                    screenshot_url=screenshot_url,  # 🆕 스크린샷
+                    favicon_url=favicon_url  # 🆕 파비콘
                 )
                 policy_responses.append(policy_response)
             

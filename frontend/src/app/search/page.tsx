@@ -25,7 +25,14 @@ export default function SearchPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedRegion, setSelectedRegion] = useState(regionParam);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
+  
+  // 필터 변경 시 페이지 1로 리셋
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedRegion, selectedCategory, query]);
   const [progress, setProgress] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 7; // 페이지당 7개
   
   // Load filters
   useEffect(() => {
@@ -66,10 +73,14 @@ export default function SearchPage() {
     const loadPolicies = async () => {
       try {
         setLoading(true);
+        // page를 offset으로 변환: offset = (page - 1) * limit
+        const offset = (currentPage - 1) * pageSize;
         const data = await getPolicies({
           query: query || undefined,
           region: selectedRegion || undefined,
           category: selectedCategory || undefined,
+          limit: pageSize,
+          offset: offset,
         });
         setPolicies(data);
       } catch (error) {
@@ -79,7 +90,7 @@ export default function SearchPage() {
     };
     
     loadPolicies();
-  }, [query, selectedRegion, selectedCategory, setPolicies, setLoading, setError]);
+  }, [query, selectedRegion, selectedCategory, currentPage, setPolicies, setLoading, setError]);
   
   // Show loading screen
   if (loading && policies.length === 0) {
@@ -256,6 +267,64 @@ export default function SearchPage() {
         loading={loading}
         emptyMessage="검색 결과가 없습니다. 다른 조건으로 검색해보세요."
       />
+      
+      {/* Pagination */}
+      {total > pageSize && (
+        <div className="mt-12 flex items-center justify-center gap-2">
+          {/* Previous Button */}
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-1"
+          >
+            <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+            이전
+          </button>
+          
+          {/* Page Numbers */}
+          <div className="flex items-center gap-1">
+            {Array.from({ length: Math.ceil(total / pageSize) }, (_, i) => i + 1)
+              .filter((page) => {
+                // 현재 페이지 주변 5개만 표시
+                const diff = Math.abs(page - currentPage);
+                return diff === 0 || diff <= 2 || page === 1 || page === Math.ceil(total / pageSize);
+              })
+              .map((page, index, array) => {
+                // "..." 표시를 위한 로직
+                const prevPage = array[index - 1];
+                const showEllipsis = prevPage && page - prevPage > 1;
+                
+                return (
+                  <React.Fragment key={page}>
+                    {showEllipsis && (
+                      <span className="px-3 py-2 text-gray-400">...</span>
+                    )}
+                    <button
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-[40px] h-[40px] rounded-lg font-bold transition-all ${
+                        currentPage === page
+                          ? 'bg-primary text-white shadow-lg'
+                          : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  </React.Fragment>
+                );
+              })}
+          </div>
+          
+          {/* Next Button */}
+          <button
+            onClick={() => setCurrentPage((prev) => Math.min(Math.ceil(total / pageSize), prev + 1))}
+            disabled={currentPage === Math.ceil(total / pageSize)}
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-1"
+          >
+            다음
+            <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+          </button>
+        </div>
+      )}
       
       {/* Back Button Footer */}
       <div className="mt-16 flex flex-col items-center border-t border-[#eaf0ef] dark:border-[#2d3332] pt-12">

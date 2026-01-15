@@ -45,7 +45,8 @@ def web_search_node(state: Dict[str, Any]) -> Dict[str, Any]:
                 results = tavily_client.search(
                     query=current_query,
                     max_results=5,
-                    search_depth="advanced"
+                    search_depth="advanced",
+                    days=365  # Q&A 중 추가 검색은 1년 범위로 (이미 선택한 정책 관련 정보)
                 )
                 
                 # Format Tavily results

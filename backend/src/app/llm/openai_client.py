@@ -1,9 +1,9 @@
 """
 OpenAI Client
-LLM 호출 래퍼
+LLM 호출 래퍼 (스트리밍 지원)
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, AsyncGenerator
 from functools import lru_cache
 
 from langchain_openai import ChatOpenAI
@@ -67,7 +67,7 @@ class OpenAIClient:
         max_tokens: Optional[int] = None
     ) -> str:
         """
-        메시지 기반 응답 생성
+        메시지 기반 응답 생성 (Non-streaming)
         
         Args:
             messages: 메시지 리스트 [{"role": "user/assistant/system", "content": str}]
@@ -79,17 +79,7 @@ class OpenAIClient:
         """
         try:
             # Convert to LangChain messages
-            lc_messages = []
-            for msg in messages:
-                role = msg.get("role", "user")
-                content = msg.get("content", "")
-                
-                if role == "system":
-                    lc_messages.append(SystemMessage(content=content))
-                elif role == "assistant":
-                    lc_messages.append(AIMessage(content=content))
-                else:  # user
-                    lc_messages.append(HumanMessage(content=content))
+            lc_messages = self._convert_to_langchain_messages(messages)
             
             # Generate response
             response = self.model.invoke(
@@ -131,6 +121,93 @@ class OpenAIClient:
         ]
         
         return self.generate(messages, temperature=temperature)
+    
+    async def generate_stream(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None
+    ) -> AsyncGenerator[str, None]:
+        """
+        메시지 기반 스트리밍 응답 생성
+        
+        Args:
+            messages: 메시지 리스트 [{"role": "user/assistant/system", "content": str}]
+            temperature: 온도 (선택)
+            max_tokens: 최대 토큰 (선택)
+        
+        Yields:
+            str: 생성된 응답 청크 (한 글자씩 또는 단어씩)
+        """
+        try:
+            # Convert to LangChain messages
+            lc_messages = self._convert_to_langchain_messages(messages)
+            
+            # Generate streaming response
+            async for chunk in self.model.astream(
+                lc_messages,
+                temperature=temperature or self.temperature,
+                max_tokens=max_tokens
+            ):
+                if chunk.content:
+                    yield chunk.content
+                    
+        except Exception as e:
+            logger.error(
+                "Error generating streaming response",
+                extra={"error": str(e)},
+                exc_info=True
+            )
+            raise
+    
+    async def generate_with_system_stream(
+        self,
+        system_prompt: str,
+        user_message: str,
+        temperature: Optional[float] = None
+    ) -> AsyncGenerator[str, None]:
+        """
+        시스템 프롬프트와 사용자 메시지로 스트리밍 응답 생성
+        
+        Args:
+            system_prompt: 시스템 프롬프트
+            user_message: 사용자 메시지
+            temperature: 온도 (선택)
+        
+        Yields:
+            str: 생성된 응답 청크
+        """
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ]
+        
+        async for chunk in self.generate_stream(messages, temperature=temperature):
+            yield chunk
+    
+    def _convert_to_langchain_messages(self, messages: List[Dict[str, str]]) -> List:
+        """
+        딕셔너리 메시지를 LangChain 메시지로 변환
+        
+        Args:
+            messages: 메시지 리스트
+        
+        Returns:
+            List: LangChain 메시지 리스트
+        """
+        lc_messages = []
+        for msg in messages:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            
+            if role == "system":
+                lc_messages.append(SystemMessage(content=content))
+            elif role == "assistant":
+                lc_messages.append(AIMessage(content=content))
+            else:  # user
+                lc_messages.append(HumanMessage(content=content))
+        
+        return lc_messages
 
 
 @lru_cache()

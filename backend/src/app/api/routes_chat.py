@@ -1,13 +1,15 @@
 """
 Chat API Routes
-Q&A 멀티턴 대화 엔드포인트
+Q&A 멀티턴 대화 엔드포인트 (스트리밍 지원)
 """
 
 import uuid
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from ..agent import AgentController
+from ..agent.streaming_controller import get_streaming_controller
 from ..domain.chat import ChatRequest, ChatResponse, SessionResetResponse
 from ..config.logger import get_logger
 from ..cache import get_policy_cache, get_chat_cache
@@ -35,6 +37,22 @@ class InitPolicyResponse(BaseModel):
     status: str
     message: str
     documents_count: int
+
+
+class InitWebPolicyRequest(BaseModel):
+    session_id: str
+    web_id: str
+    title: str
+    url: str
+    content: str
+    source: str = "웹 검색"
+
+
+class InitWebPolicyResponse(BaseModel):
+    session_id: str
+    web_id: str
+    status: str
+    message: str
 
 
 class CleanupRequest(BaseModel):
@@ -202,6 +220,85 @@ async def init_policy(request: InitPolicyRequest):
 
 
 @router.post(
+    "/chat/init-web-policy",
+    response_model=InitWebPolicyResponse,
+    summary="웹 공고 선택 시 컨텍스트 초기화",
+    description="사용자가 웹 검색 결과 공고를 클릭했을 때 컨텍스트를 캐시에 저장합니다.",
+    tags=["Chat"]
+)
+async def init_web_policy(request: InitWebPolicyRequest):
+    """
+    웹 공고 선택 시 컨텍스트 초기화 API
+    
+    **기능:**
+    - 웹 검색 결과 공고 선택 시 컨텍스트를 캐시에 저장
+    - 이후 질문에서는 웹 공고 내용을 기반으로 LLM 답변 생성
+    
+    **예시:**
+    ```json
+    {
+      "session_id": "abc-123",
+      "web_id": "web_xyz",
+      "title": "프리랜서를 위한 정부지원제도",
+      "url": "https://example.com/...",
+      "content": "웹 공고 본문 내용...",
+      "source": "웹 검색"
+    }
+    ```
+    """
+    try:
+        session_id = request.session_id
+        web_id = request.web_id
+        
+        # 웹 공고 정보
+        web_info = {
+            "title": request.title,
+            "url": request.url,
+            "source": request.source
+        }
+        
+        # 캐시에 저장
+        policy_cache.set_web_context(
+            session_id=session_id,
+            web_id=web_id,
+            web_info=web_info,
+            content=request.content
+        )
+        
+        logger.info(
+            "Web policy initialized successfully",
+            extra={
+                "session_id": session_id,
+                "web_id": web_id,
+                "title": request.title,
+                "url": request.url
+            }
+        )
+        
+        return InitWebPolicyResponse(
+            session_id=session_id,
+            web_id=web_id,
+            status="initialized",
+            message="웹 공고 컨텍스트가 로드되었습니다."
+        )
+        
+    except Exception as e:
+        logger.error(
+            "Error initializing web policy",
+            extra={
+                "session_id": request.session_id,
+                "web_id": request.web_id,
+                "error": str(e)
+            },
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"웹 공고 초기화 실패: {str(e)}"
+        )
+
+
+@router.post(
     "/chat/cleanup",
     response_model=CleanupResponse,
     summary="대화창 나갈 때 캐시 정리",
@@ -308,5 +405,64 @@ async def reset_session(session_id: str):
         raise HTTPException(
             status_code=500,
             detail=f"세션 초기화 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.post(
+    "/chat/stream",
+    summary="Q&A 스트리밍 대화",
+    description="스트리밍 방식으로 실시간 답변 생성",
+    tags=["Chat"]
+)
+async def chat_stream(request: ChatRequest):
+    """
+    스트리밍 Q&A 엔드포인트
+    
+    SSE (Server-Sent Events) 형식으로 실시간 답변 스트리밍
+    
+    이벤트 타입:
+    - status: 진행 상태 (classifying, loading, searching, generating)
+    - chunk: 답변 청크 (한 글자씩 또는 단어씩)
+    - evidence: 근거 자료
+    - done: 완료
+    - error: 오류
+    """
+    try:
+        session_id = request.session_id or str(uuid.uuid4())
+        policy_id = request.policy_id
+        user_query = request.message
+        
+        logger.info(
+            "Starting streaming Q&A",
+            extra={
+                "session_id": session_id,
+                "policy_id": policy_id,
+                "query": user_query
+            }
+        )
+        
+        # 스트리밍 컨트롤러 생성
+        controller = get_streaming_controller()
+        
+        # 스트리밍 응답 생성
+        return StreamingResponse(
+            controller.process_query_stream(session_id, policy_id, user_query),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no"  # Nginx 버퍼링 비활성화
+            }
+        )
+        
+    except Exception as e:
+        logger.error(
+            "Error in streaming chat",
+            extra={"error": str(e)},
+            exc_info=True
+        )
+        raise HTTPException(
+            status_code=500,
+            detail=f"스트리밍 처리 중 오류가 발생했습니다: {str(e)}"
         )
 

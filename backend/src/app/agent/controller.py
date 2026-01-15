@@ -57,10 +57,10 @@ class AgentController:
             
             # 사용자 메시지를 캐시에 추가
             chat_cache.add_message(
-                session_id=session_id,
+                    session_id=session_id,
                 role="user",
-                content=user_message
-            )
+                    content=user_message
+                )
             
             # 워크플로우 실행
             result = run_qa_workflow(
@@ -72,7 +72,7 @@ class AgentController:
             
             # 어시스턴트 응답을 캐시에 저장
             chat_cache.add_message(
-                session_id=session_id,
+                    session_id=session_id,
                 role="assistant",
                 content=result.get("answer", "")
             )
@@ -82,8 +82,8 @@ class AgentController:
                 extra={
                     "session_id": session_id,
                     "has_answer": bool(result.get("answer"))
-                }
-            )
+                    }
+                )
             
             return {
                 "session_id": session_id,

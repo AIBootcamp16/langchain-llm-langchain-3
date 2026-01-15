@@ -55,6 +55,10 @@ class PolicyResponse(BaseModel):
     # Search metadata (optional)
     score: Optional[float] = Field(None, description="검색 스코어")
     
+    # Web search metadata (optional)
+    screenshot_url: Optional[str] = Field(None, description="웹사이트 스크린샷 URL")
+    favicon_url: Optional[str] = Field(None, description="웹사이트 파비콘 URL")
+    
     class Config:
         from_attributes = True
         json_schema_extra = {

@@ -23,19 +23,14 @@ export const Header: React.FC = () => {
             </h2>
           </Link>
         </div>
-        <div className="flex items-center gap-6">
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              href={routes.home}
-              className="text-sm font-semibold hover:text-primary transition-colors flex items-center gap-1.5"
-            >
-              <span className="material-symbols-outlined text-[18px]">home</span> Home
-            </Link>
-          </nav>
-          <button className="bg-primary hover:bg-primary/90 text-white text-sm font-bold py-2 px-5 rounded-lg transition-all shadow-sm">
-            Login
-          </button>
-        </div>
+        <nav className="flex items-center gap-8">
+          <Link
+            href={routes.home}
+            className="text-sm font-semibold hover:text-primary transition-colors flex items-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-[18px]">home</span> Home
+          </Link>
+        </nav>
       </div>
     </header>
   );

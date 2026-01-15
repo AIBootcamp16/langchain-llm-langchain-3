@@ -33,6 +33,8 @@ export interface Policy {
   created_at: string;
   updated_at?: string;
   score?: number | null;
+  screenshot_url?: string;  // 웹 검색 결과 스크린샷
+  favicon_url?: string;      // 웹 검색 결과 파비콘
 }
 
 export interface PolicyListResponse {
@@ -152,7 +154,7 @@ export interface SearchParams {
   query?: string;
   region?: string;
   category?: string;
-  page?: number;
-  size?: number;
+  limit?: number;   // 반환 개수
+  offset?: number;  // 오프셋 (페이지네이션)
 }
 

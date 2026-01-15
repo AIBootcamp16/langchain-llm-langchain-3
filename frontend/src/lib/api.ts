@@ -67,11 +67,107 @@ export const getCategories = async (): Promise<string[]> => {
 // ============================================================
 
 /**
- * Q&A 채팅
+ * Q&A 채팅 (Non-streaming)
  */
 export const sendChatMessage = async (request: ChatRequest): Promise<ChatResponse> => {
   const response = await apiClient.post<ChatResponse>('/api/v1/chat', request);
   return response.data;
+};
+
+/**
+ * Q&A 채팅 (Streaming)
+ * 
+ * SSE (Server-Sent Events)를 사용한 실시간 스트리밍
+ * 
+ * @param request - 채팅 요청
+ * @param onChunk - 답변 청크 수신 시 호출되는 콜백
+ * @param onStatus - 상태 업데이트 시 호출되는 콜백
+ * @param onEvidence - Evidence 수신 시 호출되는 콜백
+ * @param onError - 에러 발생 시 호출되는 콜백
+ * @param onDone - 완료 시 호출되는 콜백
+ */
+export const sendChatMessageStream = async (
+  request: ChatRequest,
+  callbacks: {
+    onChunk?: (chunk: string) => void;
+    onStatus?: (status: { step: string; message: string }) => void;
+    onEvidence?: (evidence: any[]) => void;
+    onError?: (error: string) => void;
+    onDone?: () => void;
+  }
+): Promise<void> => {
+  const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const url = `${baseURL}/api/v1/chat/stream`;
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+  
+  if (!reader) {
+    throw new Error('Response body is not readable');
+  }
+  
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      
+      if (done) break;
+      
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+      
+      for (const line of lines) {
+        if (line.startsWith('event:')) {
+          const eventType = line.substring(6).trim();
+          continue;
+        }
+        
+        if (line.startsWith('data:')) {
+          const data = line.substring(5).trim();
+          
+          if (!data) continue;
+          
+          try {
+            const parsed = JSON.parse(data);
+            
+            // 이벤트 타입에 따라 콜백 호출
+            if (parsed.content && callbacks.onChunk) {
+              callbacks.onChunk(parsed.content);
+            } else if (parsed.step && callbacks.onStatus) {
+              callbacks.onStatus(parsed);
+            } else if (parsed.evidence && callbacks.onEvidence) {
+              callbacks.onEvidence(parsed.evidence);
+            } else if (parsed.message === '완료' && callbacks.onDone) {
+              callbacks.onDone();
+            } else if (parsed.message && parsed.code && callbacks.onError) {
+              // 에러 이벤트 (code 포함)
+              callbacks.onError(parsed);
+            }
+          } catch (e) {
+            console.error('Failed to parse SSE data:', e);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    if (callbacks.onError) {
+      callbacks.onError(error instanceof Error ? error.message : String(error));
+    }
+    throw error;
+  } finally {
+    reader.releaseLock();
+  }
 };
 
 /**
@@ -81,6 +177,26 @@ export const initPolicy = async (sessionId: string, policyId: number): Promise<v
   await apiClient.post('/api/v1/chat/init-policy', {
     session_id: sessionId,
     policy_id: policyId,
+  });
+};
+
+/**
+ * 웹 공고 캐시 초기화 (웹 검색 결과 클릭 시)
+ */
+export const initWebPolicy = async (
+  sessionId: string,
+  webId: string,
+  title: string,
+  url: string,
+  content: string
+): Promise<void> => {
+  await apiClient.post('/api/v1/chat/init-web-policy', {
+    session_id: sessionId,
+    web_id: webId,
+    title: title,
+    url: url,
+    content: content,
+    source: '웹 검색',
   });
 };
 
