@@ -105,7 +105,7 @@ async def root():
 # Include Routers
 # ============================================================
 
-app.include_router(routes_policy.router, prefix="/api/v1", tags=["Policies"])
+app.include_router(routes_policy.router, prefix="/api/v1/policies", tags=["Policies"])
 app.include_router(routes_chat.router, prefix="/api/v1", tags=["Chat"])
 app.include_router(routes_eligibility.router, prefix="/api/v1", tags=["Eligibility"])
 app.include_router(routes_admin.router, prefix="/api/v1", tags=["Admin"])

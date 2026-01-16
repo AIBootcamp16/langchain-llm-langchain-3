@@ -31,7 +31,22 @@ const apiClient: AxiosInstance = axios.create({
 // ============================================================
 
 /**
- * 정책 목록 조회
+ * 정책 검색 (SimpleSearchService - 빠른 검색)
+ * 하이브리드 검색 (Dense + Sparse BM25) 사용
+ */
+export const searchPolicies = async (params: {
+  query: string;
+  region?: string;
+  category?: string;
+  target_group?: string;
+  session_id?: string;
+}): Promise<any> => {
+  const response = await apiClient.get('/api/v1/policies/search', { params });
+  return response.data;
+};
+
+/**
+ * 정책 목록 조회 (Legacy - PolicySearchService)
  */
 export const getPolicies = async (params: SearchParams = {}): Promise<PolicyListResponse> => {
   const response = await apiClient.get<PolicyListResponse>('/api/v1/policies', { params });
@@ -42,7 +57,7 @@ export const getPolicies = async (params: SearchParams = {}): Promise<PolicyList
  * 정책 상세 조회
  */
 export const getPolicy = async (policyId: number): Promise<Policy> => {
-  const response = await apiClient.get<Policy>(`/api/v1/policy/${policyId}`);
+  const response = await apiClient.get<Policy>(`/api/v1/policies/${policyId}`);
   return response.data;
 };
 

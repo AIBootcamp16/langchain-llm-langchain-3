@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { PolicyList } from '@/components/policy/PolicyList';
-import { getPolicies, getRegions, getCategories } from '@/lib/api';
+import { searchPolicies, getRegions, getCategories } from '@/lib/api';
 import { usePolicyStore } from '@/store/usePolicyStore';
 import { routes } from '@/lib/routes';
 
@@ -25,14 +25,15 @@ export default function SearchPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedRegion, setSelectedRegion] = useState(regionParam);
   const [selectedCategory, setSelectedCategory] = useState(categoryParam);
+  const [progress, setProgress] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [allPolicies, setAllPolicies] = useState<any[]>([]); // 전체 결과 저장
+  const pageSize = 7; // 페이지당 7개
   
   // 필터 변경 시 페이지 1로 리셋
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedRegion, selectedCategory, query]);
-  const [progress, setProgress] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 7; // 페이지당 7개
   
   // Load filters
   useEffect(() => {
@@ -68,21 +69,39 @@ export default function SearchPage() {
     }
   }, [loading]);
   
-  // Load policies
+  // Load policies (모든 결과 한 번에 가져오기)
   useEffect(() => {
     const loadPolicies = async () => {
       try {
         setLoading(true);
-        // page를 offset으로 변환: offset = (page - 1) * limit
-        const offset = (currentPage - 1) * pageSize;
-        const data = await getPolicies({
-          query: query || undefined,
+        
+        // SimpleSearchService 사용 (하이브리드 검색)
+        if (!query) {
+          // 쿼리가 없으면 빈 결과 표시
+          setAllPolicies([]);
+          setPolicies({ policies: [], total: 0, count: 0, offset: 0, limit: pageSize });
+          return;
+        }
+        
+        const data = await searchPolicies({
+          query: query,
           region: selectedRegion || undefined,
           category: selectedCategory || undefined,
-          limit: pageSize,
-          offset: offset,
         });
-        setPolicies(data);
+        
+        // 전체 결과 저장
+        const allResults = data.policies || [];
+        setAllPolicies(allResults);
+        
+        // 첫 페이지 표시
+        const firstPagePolicies = allResults.slice(0, pageSize);
+        setPolicies({
+          policies: firstPagePolicies,
+          total: allResults.length,  // 전체 결과 수로 설정
+          count: firstPagePolicies.length,
+          offset: 0,
+          limit: pageSize,
+        });
       } catch (error) {
         console.error('Failed to load policies:', error);
         setError('정책을 불러오는 데 실패했습니다.');
@@ -90,7 +109,24 @@ export default function SearchPage() {
     };
     
     loadPolicies();
-  }, [query, selectedRegion, selectedCategory, currentPage, setPolicies, setLoading, setError]);
+  }, [query, selectedRegion, selectedCategory, setPolicies, setLoading, setError]);
+  
+  // 페이지 변경 시 해당 페이지 데이터 표시
+  useEffect(() => {
+    if (allPolicies.length > 0) {
+      const startIndex = (currentPage - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const pagePolicies = allPolicies.slice(startIndex, endIndex);
+      
+      setPolicies({
+        policies: pagePolicies,
+        total: allPolicies.length,
+        count: pagePolicies.length,
+        offset: startIndex,
+        limit: pageSize,
+      });
+    }
+  }, [currentPage, allPolicies, setPolicies]);
   
   // Show loading screen
   if (loading && policies.length === 0) {

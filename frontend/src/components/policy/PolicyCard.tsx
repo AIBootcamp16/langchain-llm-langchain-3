@@ -16,7 +16,7 @@ interface PolicyCardProps {
 
 export const PolicyCard: React.FC<PolicyCardProps> = ({ policy }) => {
   // 웹 검색 결과 여부 확인
-  const isWebResult = policy.region === '웹 검색' || policy.id < 0;
+  const isWebResult = policy.source_type === 'web' || policy.id < 0;
   
   // 상태 결정 로직 (실제로는 API에서 받아와야 함)
   const getStatus = () => {
@@ -35,15 +35,10 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({ policy }) => {
       // 웹 검색 결과 → 웹 상세 페이지
       const webId = `web_${Math.abs(policy.id)}`;
       const title = encodeURIComponent(policy.program_name);
-      const url = encodeURIComponent(policy.support_description.replace('출처: ', ''));
+      const url = encodeURIComponent((policy as any).url || policy.application_method || '');
       const content = encodeURIComponent(policy.program_overview || '');
       const screenshotUrl = (policy as any).screenshot_url || '';
       const faviconUrl = (policy as any).favicon_url || '';
-      
-      console.log('=== PolicyCard 웹 검색 결과 ===');
-      console.log('policy:', policy);
-      console.log('screenshotUrl:', screenshotUrl);
-      console.log('faviconUrl:', faviconUrl);
       
       return `/policy/web-detail/${webId}?title=${title}&url=${url}&content=${content}&screenshot=${encodeURIComponent(screenshotUrl)}&favicon=${encodeURIComponent(faviconUrl)}`;
     } else {

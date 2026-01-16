@@ -23,7 +23,6 @@ export default function HomePage() {
   };
 
   const quickKeywords = ['창업', '소상공인', '프리랜서'];
-  const regions = ['서울', '경기', '부산', '전국'];
   
   return (
     <main className="flex-1 flex flex-col items-center justify-center px-6 pb-32">
@@ -84,20 +83,6 @@ export default function HomePage() {
                   'bg-orange-400'
                 }`} />
                 {keyword}
-              </button>
-            ))}
-            
-            <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2" />
-            
-            {regions.map((region) => (
-              <button
-                key={region}
-                onClick={() => {
-                  router.push(`${routes.search}?region=${encodeURIComponent(region)}`);
-                }}
-                className="flex h-10 items-center justify-center px-5 rounded-full bg-gray-100 dark:bg-gray-800 text-sm font-medium hover:bg-gray-200 transition-all border border-transparent"
-              >
-                {region}
               </button>
             ))}
           </div>
