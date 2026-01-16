@@ -51,8 +51,7 @@
     <sub>✅ 역할 추가 예정 </sub><br>
 </td>
 <td align="center">
-    <sub><b>📌 담당 역할</b></sub><br>
-    <sub>✅ 역할 추가 예정 </sub><br>
+    <sub><b>📌 기획, 아키텍처설계, DB, 백엔드/프론트엔드, QA Agent 설계, 코드 통합</b></sub><br>
 </td>
 <td align="center">
     <sub><b>📌 담당 역할</b></sub><br>
