@@ -8,6 +8,7 @@ import uuid
 
 from ..config.logger import get_logger
 from ..cache import get_chat_cache
+from ..observability import trace_workflow, get_feature_tags
 # DB 관련 import는 유지 (추후 필요 시 재사용 가능)
 # from ..db.engine import get_db
 # from ..db.repositories import SessionRepository
@@ -26,6 +27,11 @@ class AgentController:
     """
     
     @staticmethod
+    @trace_workflow(
+        name="agent_controller_run_qa",
+        tags=None,  # 런타임에 동적으로 추가
+        metadata={"controller": "qa", "version": "v2_cache"}
+    )
     def run_qa(
         session_id: str,
         policy_id: int,
