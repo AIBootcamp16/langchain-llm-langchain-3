@@ -99,7 +99,7 @@ class EligibilityResult(BaseModel):
     
     session_id: str = Field(..., description="세션 ID")
     policy_id: int = Field(..., description="정책 ID")
-    result: Literal["ELIGIBLE", "NOT_ELIGIBLE", "PARTIALLY"] = Field(..., description="최종 결과")
+    result: Literal["ELIGIBLE", "NOT_ELIGIBLE", "PARTIALLY", "UNKNOWN", "PASS", "FAIL"] = Field(..., description="최종 결과")
     reason: str = Field(..., description="종합 판정 사유")
     details: List[ConditionResult] = Field(..., description="조건별 상세 결과")
     

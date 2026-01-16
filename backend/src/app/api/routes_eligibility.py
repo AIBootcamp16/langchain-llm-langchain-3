@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from ..config.logger import get_logger
 from ..db.engine import get_db_session
-from ..db.models import Policy, ChecklistResult
+from ..db.models import Policy, ChecklistResult, Session as DBSession, WorkflowTypeEnum
 from ..domain.eligibility import (
     EligibilityStartRequest,
     EligibilityStartResponse,
@@ -66,7 +66,16 @@ async def start_eligibility_check(
             apply_target=policy.apply_target
         )
         
-        # Save session
+        # Save session to DB
+        db_session = DBSession(
+            id=session_id,
+            policy_id=request.policy_id,
+            workflow_type=WorkflowTypeEnum.ELIGIBILITY
+        )
+        db.add(db_session)
+        db.commit()
+
+        # Save session to memory
         _eligibility_sessions[session_id] = result
         
         # Calculate progress
@@ -110,10 +119,10 @@ async def answer_eligibility_question(
 ):
     """
     자격 확인 질문 답변
-    
+
     Args:
         request: 자격 확인 답변 요청
-    
+
     Returns:
         EligibilityAnswerResponse: 다음 질문 또는 완료 메시지
     """
@@ -122,8 +131,16 @@ async def answer_eligibility_question(
         session_id = request.session_id
         if session_id not in _eligibility_sessions:
             raise HTTPException(status_code=404, detail="세션을 찾을 수 없습니다.")
-        
+
         current_state = _eligibility_sessions[session_id]
+
+        # DEBUG: Log incoming answer and session state
+        print(f"[DEBUG] /answer endpoint called")
+        print(f"  - session_id: {session_id}")
+        print(f"  - user_answer: {request.answer}")
+        print(f"  - current_condition_index: {current_state.get('current_condition_index')}")
+        print(f"  - current_question: {current_state.get('current_question')}")
+        print(f"  - existing user_slots: {current_state.get('user_slots', {})}")
         
         # Run workflow with answer
         result = run_eligibility_answer(
@@ -134,7 +151,12 @@ async def answer_eligibility_question(
         
         # Update session
         _eligibility_sessions[session_id] = result
-        
+
+        # DEBUG: Log updated session state after processing
+        print(f"[DEBUG] After processing answer:")
+        print(f"  - updated user_slots: {result.get('user_slots', {})}")
+        print(f"  - conditions: {result.get('conditions', [])}")
+
         # Calculate progress
         conditions = result.get("conditions", [])
         total_conditions = len(conditions)

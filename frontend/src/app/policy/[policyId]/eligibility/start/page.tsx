@@ -16,12 +16,14 @@ export default function EligibilityStartPage() {
   const router = useRouter();
   const policyId = Number(params.policyId);
   
-  const { setSession, setQuestion, setLoading, loading, error } = useEligibilityStore();
-  
+  const { setSession, setQuestion, setLoading, loading, error, reset } = useEligibilityStore();
+
   const handleStart = async () => {
     try {
+      // Reset previous session state before starting new check
+      reset();
       setLoading(true);
-      
+
       const response = await startEligibilityCheck({ policy_id: policyId });
       
       setSession(response.session_id, response.policy_id);
