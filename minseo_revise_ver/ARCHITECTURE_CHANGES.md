@@ -314,21 +314,107 @@ solar_api_key: Optional[str] = Field(
 - `solar_client.py`를 통한 Solar LLM 통합
 - `llm_provider` 설정으로 선택 가능
 
-### 🗑️ MVP에는 없고 현재 프로젝트에만 있는 파일 (비활성화됨)
+### 🗑️ 삭제된 파일 (사용되지 않아 제거됨)
 
-#### 20. `backend/src/app/agent/workflows/search_workflow.py`
-- **상태**: 유지되지만 주석 처리됨 (참고용)
-- **역할**: LangGraph 기반 Search Workflow 생성
+#### 20. `backend/src/app/agent/workflows/search_workflow.py` ❌ 삭제됨
+- **삭제일**: 2026-01-15
+- **이유**: `SimpleSearchService`로 완전 대체되어 사용되지 않음
+- **이전 역할**: LangGraph 기반 Search Workflow 생성
 - **대체**: `SimpleSearchService`로 완전 대체됨
 
-**주요 함수 (비활성화)**:
+**삭제된 주요 함수**:
 - `create_search_workflow()`: LangGraph StateGraph 생성
 - `should_web_search()`: 충분성 검사 후 웹 검색 라우팅
+- `run_search_workflow()`: 워크플로우 실행 함수
 
-#### 21. `backend/src/app/agent/nodes/search/` 디렉토리
-- **상태**: 유지되지만 사용하지 않음
-- **역할**: LangGraph 워크플로우용 검색 노드들
+#### 21. `backend/src/app/agent/nodes/search/` 디렉토리 전체 ❌ 삭제됨
+- **삭제일**: 2026-01-15
+- **이유**: `search_workflow.py`에서만 사용되었고, 해당 파일이 삭제됨
+- **이전 역할**: LangGraph 워크플로우용 검색 노드들
 - **대체**: `SimpleSearchService`로 대체됨
+
+**삭제된 파일 목록**:
+1. `query_understanding_node.py` - 쿼리 이해 노드 (LLM 사용)
+2. `search_retrieve_node.py` - 벡터 검색 노드
+3. `search_check_node.py` - 충분성 검사 노드 (LLM 사용)
+4. `search_web_node.py` - 웹 검색 노드
+5. `summarize_node.py` - 결과 요약 노드 (LLM 사용)
+6. `__init__.py` - 모듈 초기화 파일
+
+**삭제 이유 요약**:
+- 검색 기능이 LLM 호출 없이 빠른 벡터 검색으로 전환됨
+- LangGraph 워크플로우 대신 단순 함수 기반 서비스 사용
+- 성능 향상 및 비용 절감 (LLM 호출 제거)
+
+---
+
+### 🗑️ 사용되지 않는 파일 (삭제 가능)
+
+현재 프로젝트에서 실제로 사용되지 않는 파일들입니다. 코드베이스를 정리하기 위해 삭제를 고려할 수 있습니다.
+
+#### 22. 프롬프트 템플릿 파일 (검색 관련, LLM 미사용)
+
+**`backend/src/app/prompts/policy_search_prompt.jinja2`**
+- **이유**: 검색 기능은 `SimpleSearchService`를 사용하며 LLM 호출 없음
+- **상태**: 어디서도 import되지 않음
+- **확인**: `grep -r "policy_search_prompt"` 결과 없음
+
+**`backend/src/app/prompts/policy_grading_prompt.jinja2`**
+- **이유**: 검색 결과 등급 평가 기능이 제거됨
+- **상태**: 어디서도 import되지 않음
+
+**`backend/src/app/prompts/grading_prompt.jinja2`**
+- **이유**: 검색 결과 등급 평가 기능이 제거됨
+- **상태**: 어디서도 import되지 않음 (RAG_WORKFLOW_IMPROVEMENT.md에만 언급)
+
+#### 23. 서비스 디렉토리의 프롬프트 파일 (중복/미사용)
+
+**`backend/src/app/services/policy_grading_prompt.jinja2`**
+- **이유**: `prompts/` 디렉토리에 동일한 파일이 있고, 어디서도 사용되지 않음
+- **상태**: 어디서도 import되지 않음
+
+**`backend/src/app/services/policy_search_prompt.jinja2`**
+- **이유**: `prompts/` 디렉토리에 동일한 파일이 있고, 어디서도 사용되지 않음
+- **상태**: 어디서도 import되지 않음
+
+#### 24. 빈 파일
+
+**`backend/src/app/services/template.py`**
+- **이유**: 빈 파일 (내용 없음)
+- **상태**: 어디서도 import되지 않음
+
+#### 25. 문서 파일 (코드에서 참조되지 않음)
+
+**`backend/src/app/services/RAG_WORKFLOW_IMPROVEMENT.md`**
+- **이유**: 문서 파일이며, 코드에서 참조되지 않음
+- **상태**: 문서만 존재, 코드에서 사용 안 함
+
+**`backend/src/app/report.md`**
+- **이유**: 문서 파일이며, 코드에서 참조되지 않음
+- **상태**: 문서만 존재, 코드에서 사용 안 함
+
+#### 26. 유틸리티 파일 (사용되지 않음)
+
+**`backend/src/app/utils/template.py`**
+- **이유**: `load_prompt()` 함수가 정의되어 있지만 실제로 사용되지 않음
+- **상태**: `grep -r "load_prompt"` 결과 없음 (정의만 있고 사용 안 함)
+- **참고**: 프롬프트는 직접 경로로 로드됨 (`answer_node.py` 참고)
+
+**삭제 가능한 파일 요약**:
+| 파일 경로 | 크기 (예상) | 삭제 이유 |
+|---------|-----------|----------|
+| `prompts/policy_search_prompt.jinja2` | ~1KB | 검색에서 LLM 미사용 |
+| `prompts/policy_grading_prompt.jinja2` | ~1KB | 등급 평가 기능 제거 |
+| `prompts/grading_prompt.jinja2` | ~1KB | 등급 평가 기능 제거 |
+| `services/policy_grading_prompt.jinja2` | ~1KB | 중복, 미사용 |
+| `services/policy_search_prompt.jinja2` | ~1KB | 중복, 미사용 |
+| `services/template.py` | 0KB | 빈 파일 |
+| `services/RAG_WORKFLOW_IMPROVEMENT.md` | ~10KB | 문서 파일 |
+| `app/report.md` | ~5KB | 문서 파일 |
+| `utils/template.py` | ~0.5KB | 미사용 함수 |
+
+**총 예상 크기**: ~20KB
+
 
 ---
 
@@ -493,6 +579,7 @@ const response = await searchPolicies({ query, region, category });
 ## 📚 참고 문서
 
 - [README.md](./README.md): 프로젝트 전체 개요 및 새로운 검색 시스템 설명
+- [UNUSED_FILES.md](./UNUSED_FILES.md): 사용되지 않는 파일 목록 및 삭제 가이드
 - [backend/src/app/services/simple_search_service.py](./backend/src/app/services/simple_search_service.py): SimpleSearchService 구현
 - [backend/src/app/services/search_config.py](./backend/src/app/services/search_config.py): 검색 설정 파일
 
@@ -500,6 +587,10 @@ const response = await searchPolicies({ query, region, category });
 
 ## 📅 변경 이력
 
+- **2026-01-15**: 사용되지 않는 파일 정리 및 삭제
+  - `backend/src/app/agent/workflows/search_workflow.py` 삭제
+  - `backend/src/app/agent/nodes/search/` 디렉토리 전체 삭제 (6개 파일)
+  - 사용되지 않는 파일 목록 정리 (`UNUSED_FILES.md` 생성)
 - **2026-01-15**: MVP 코드와 현재 프로젝트 비교 문서 작성
 - **2026-01-15**: SimpleSearchService 통합 완료
 - **2026-01-15**: 프론트엔드 UI에서 기술 메트릭 제거 (사용자 친화적 UI)
