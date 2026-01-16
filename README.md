@@ -47,17 +47,30 @@
 </tr>
 <tr>
 <td align="center">
-    <sub><b>📌 데이터 수집 및 정제, 검색 시스템 구조 설계, Hybrid Search 구현, 검색 품질 및 성능 개선</b></sub><br>
+  <sub><b>📌 데이터 수집 및 정제<br>
+  검색 시스템 구조 설계<br>
+  Hybrid Search 구현<br>
+  검색 품질 및 성능 개선</b></sub><br>
 </td>
 <td align="center">
-    <sub><b>📌 기획, 아키텍처설계, DB, 백엔드/프론트엔드, QA Agent 설계, 코드 통합</b></sub><br>
+  <sub><b>📌 기획<br>
+  아키텍처 설계<br>
+  DB<br>
+  백엔드/프론트엔드<br>
+  QA Agent 설계<br>
+  코드 통합</b></sub><br>
 </td>
 <td align="center">
-    <sub><b>📌 담당 역할</b></sub><br>
-    <sub>✅ 역할 추가 예정 </sub><br>
+  <sub><b>📌 데이터 수집 및 정제<br>
+  Search Agent팀 기획 및 깃 정리<br>
+  Search Agent 설계 및 개발<br>
+  검색 품질 및 성능 정리</b></sub><br>
 </td>
 <td align="center">
-    <sub><b>📌 Eligibility Agent 설계, 자격검증 기능 구현, 질문지 작성 기능 구현, 데이터 수집 및 정제</b></sub><br>
+  <sub><b>📌 Eligibility Agent 설계<br>
+  자격 검증 기능 구현<br>
+  질문지 작성 기능 구현<br>
+  데이터 수집 및 정제</b></sub><br>
 </td>
 </tr>
 </table>
@@ -85,18 +98,22 @@
 </tr>
 <tr>
 <td align="center">
-    <sub><b>📌 Data수집정제, SearchAgent 설계-개발, 문제분석 및 성능개선</sub><br>
+  <sub><b>📌 데이터 수집 및 정제<br>
+  Search Agent 설계·개발<br>
+  문제 분석 및 성능 개선</b></sub><br>
 </td>
 <td align="center">
-    <sub><b>📌 데이터 수집 및 정제, Eligibility Agent 설계, 자격검증 기능 구현 </b></sub><br>
+  <sub><b>📌 데이터 수집 및 정제<br>
+  Eligibility Agent 설계<br>
+  자격 검증 기능 구현</b></sub><br>
 </td>
 <td align="center">
-    <sub><b>📌 담당 역할</b></sub><br>
-    <sub>✅ 역할 추가 예정 </sub><br>
+  <sub><b>📌 담당 역할</b></sub><br>
+  <sub>✅ 역할 추가 예정</sub><br>
 </td>
 <td align="center">
-    <sub><b>📌 담당 역할</b></sub><br>
-    <sub>✅ 역할 추가 예정 </sub><br>
+  <sub><b>📌 담당 역할</b></sub><br>
+  <sub>✅ 역할 추가 예정</sub><br>
 </td>
 </tr>
 </table>
