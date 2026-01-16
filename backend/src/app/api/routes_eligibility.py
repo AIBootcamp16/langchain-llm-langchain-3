@@ -20,7 +20,8 @@ from ..domain.eligibility import (
 )
 from ..agent.workflows.eligibility_workflow import (
     run_eligibility_start,
-    run_eligibility_answer
+    run_eligibility_answer,
+    run_eligibility_result
 )
 import uuid
 from datetime import datetime
@@ -30,6 +31,18 @@ logger = get_logger()
 
 # In-memory session store (should use Redis in production)
 _eligibility_sessions: Dict[str, Dict[str, Any]] = {}
+
+# 결과 값을 DB ENUM에 맞게 매핑
+_RESULT_TO_DB_MAP = {
+    "ELIGIBLE": "PASS",
+    "NOT_ELIGIBLE": "FAIL",
+    "PARTIALLY": "UNKNOWN",
+    "CANNOT_DETERMINE": "UNKNOWN",
+}
+
+def _map_result_for_db(result: str) -> str:
+    """워크플로우 결과를 DB 저장용 값으로 변환"""
+    return _RESULT_TO_DB_MAP.get(result, result)
 
 
 @router.post("/start", response_model=EligibilityStartResponse)
@@ -134,35 +147,22 @@ async def answer_eligibility_question(
 
         current_state = _eligibility_sessions[session_id]
 
-        # DEBUG: Log incoming answer and session state
-        print(f"[DEBUG] /answer endpoint called")
-        print(f"  - session_id: {session_id}")
-        print(f"  - user_answer: {request.answer}")
-        print(f"  - current_condition_index: {current_state.get('current_condition_index')}")
-        print(f"  - current_question: {current_state.get('current_question')}")
-        print(f"  - existing user_slots: {current_state.get('user_slots', {})}")
-        
         # Run workflow with answer
         result = run_eligibility_answer(
             session_id=session_id,
             user_answer=request.answer,
             current_state=current_state
         )
-        
+
         # Update session
         _eligibility_sessions[session_id] = result
-
-        # DEBUG: Log updated session state after processing
-        print(f"[DEBUG] After processing answer:")
-        print(f"  - updated user_slots: {result.get('user_slots', {})}")
-        print(f"  - conditions: {result.get('conditions', [])}")
 
         # Calculate progress
         conditions = result.get("conditions", [])
         total_conditions = len(conditions)
         current_index = result.get("current_condition_index", 0)
         completed = result.get("completed", False)
-        
+
         logger.info(
             "Eligibility answer processed",
             extra={
@@ -171,17 +171,17 @@ async def answer_eligibility_question(
                 "progress": f"{current_index}/{total_conditions}"
             }
         )
-        
+
         return EligibilityAnswerResponse(
             session_id=session_id,
             question=result.get("current_question") if not completed else None,
             progress={
-                "current": min(current_index, total_conditions),
+                "current": min(current_index + 1, total_conditions),
                 "total": total_conditions
             },
             completed=completed
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -194,17 +194,17 @@ async def answer_eligibility_question(
 
 
 @router.get("/result/{session_id}", response_model=EligibilityResult)
-async def get_eligibility_result(
+async def get_eligibility_result_endpoint(
     session_id: str,
     db: Session = Depends(get_db_session)
 ):
     """
     자격 확인 최종 결과 조회
-    
+
     Args:
         session_id: 세션 ID
         db: DB 세션
-    
+
     Returns:
         EligibilityResult: 최종 자격 판정 결과
     """
@@ -212,13 +212,22 @@ async def get_eligibility_result(
         # Get session
         if session_id not in _eligibility_sessions:
             raise HTTPException(status_code=404, detail="세션을 찾을 수 없습니다.")
-        
-        state = _eligibility_sessions[session_id]
-        
+
+        current_state = _eligibility_sessions[session_id]
+
         # Check if completed
-        if not state.get("completed", False):
+        if not current_state.get("completed", False):
             raise HTTPException(status_code=400, detail="자격 확인이 아직 완료되지 않았습니다.")
-        
+
+        # Run final decision workflow
+        state = run_eligibility_result(
+            session_id=session_id,
+            current_state=current_state
+        )
+
+        # Update session with final result
+        _eligibility_sessions[session_id] = state
+
         # Build result
         conditions = state.get("conditions", [])
         condition_results = [
@@ -229,16 +238,16 @@ async def get_eligibility_result(
             )
             for c in conditions
         ]
-        
+
         final_result = state.get("final_result", "NOT_ELIGIBLE")
         reason = state.get("reason", "")
         policy_id = state.get("policy_id")
         
-        # Save to DB
+        # Save to DB (결과 값을 DB ENUM에 맞게 변환)
         checklist_result = ChecklistResult(
             session_id=session_id,
             policy_id=policy_id,
-            result=final_result,
+            result=_map_result_for_db(final_result),
             reason=reason,
             created_at=datetime.utcnow()
         )

@@ -63,8 +63,8 @@ export default function EligibilityChecklistPage() {
   }
   
   // 옵션이 있는지 확인
-  const options = currentQuestion.options || [];
-  const questionText = typeof currentQuestion === 'string' ? currentQuestion : currentQuestion.question;
+  const options = currentQuestion?.options || [];
+  const questionText = currentQuestion?.question || '';
   
   return (
     <main className="flex-1 flex flex-col justify-center items-center px-4 py-8">

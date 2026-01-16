@@ -93,3 +93,12 @@ agent.md
 simple_db.md
 db.md
 
+# .gitignore 파일에 추가할 내용 권장
+before_db/
+data/
+data_pipeline/
+notebook/
+qdrant_storage_backup/
+.env*
+node_modules/(이미 되어있겠지만 확인)
+.next/
