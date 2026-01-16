@@ -57,8 +57,7 @@
     <sub>✅ 역할 추가 예정 </sub><br>
 </td>
 <td align="center">
-    <sub><b>📌 담당 역할</b></sub><br>
-    <sub>✅ 역할 추가 예정 </sub><br>
+    <sub><b>📌 Eligibility Agent 설계, 자격검증 기능 구현, 질문지 작성 기능 구현, 데이터 수집 및 정제</b></sub><br>
 </td>
 </tr>
 </table>
