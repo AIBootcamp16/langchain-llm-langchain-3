@@ -88,28 +88,6 @@
   - LangSmith 추적 지원
 - **클래스**: `SolarClient`
 
-#### 5. `backend/src/app/agent/workflows/search_workflow.py`
-**MVP 상태**: ❌ 없음  
-**현재 상태**: ✅ 추가됨 (현재는 비활성화됨)
-- **목적**: LangGraph 기반 검색 워크플로우
-- **주요 기능**:
-  - `query_understanding_node`: 쿼리 이해 (LLM)
-  - `search_retrieve_node`: 벡터 검색
-  - `search_check_sufficiency_node`: 충분성 검사
-  - `search_web_search_node`: 웹 검색
-  - `summarize_node`: 결과 요약
-- **상태**: 현재는 `SimpleSearchService`로 대체되어 사용하지 않음
-
-#### 6. `backend/src/app/agent/nodes/search/` 디렉토리 (전체)
-**MVP 상태**: ❌ 없음  
-**현재 상태**: ✅ 추가됨
-- **파일 목록**:
-  - `query_understanding_node.py`: 쿼리 이해 노드 (LLM)
-  - `search_check_node.py`: 충분성 검사 노드
-  - `search_retrieve_node.py`: 벡터 검색 노드
-  - `search_web_node.py`: 웹 검색 노드
-  - `summarize_node.py`: 결과 요약 노드
-- **상태**: `search_workflow.py`와 함께 현재는 사용하지 않음
 
 ---
 
@@ -565,8 +543,8 @@ const response = await searchPolicies({ query, region, category });
 4. 🌐 **웹 검색 개선**: Tavily 결과 후처리, 품질 필터링
 
 ### 제거/대체된 항목
-1. ❌ **Search Workflow**: LangGraph 기반 검색 워크플로우는 더 이상 사용하지 않음
-2. ❌ **LLM 기반 검색**: 쿼리 이해, 충분성 검사 등 LLM 노드 제거
+1. ❌ **Search Workflow**: LangGraph 기반 검색 워크플로우 삭제됨 (SimpleSearchService로 대체)
+2. ❌ **LLM 기반 검색**: 쿼리 이해, 충분성 검사 등 LLM 노드 삭제됨
 
 ---
 
@@ -580,20 +558,40 @@ const response = await searchPolicies({ query, region, category });
 
 ## 📅 변경 이력
 
-- **2026-01-15**: 사용되지 않는 파일 추가 정리 및 삭제
-  - `backend/src/app/prompts/policy_search_prompt.jinja2` 삭제
-  - `backend/src/app/prompts/grading_prompt.jinja2` 삭제
-  - `backend/src/app/services/policy_grading_prompt.jinja2` 삭제
-  - `backend/src/app/services/policy_search_prompt.jinja2` 삭제
-  - `backend/src/app/services/template.py` 삭제 (빈 파일)
-  - `backend/src/app/utils/template.py` 삭제 (미사용)
-- **2026-01-15**: 사용되지 않는 파일 정리 및 삭제
-  - `backend/src/app/agent/workflows/search_workflow.py` 삭제
-  - `backend/src/app/agent/nodes/search/` 디렉토리 전체 삭제 (6개 파일)
+- **2026-01-15**: 사용되지 않는 파일 최종 정리 및 삭제 완료
+  - 검색 워크플로우 관련 파일 삭제 (7개 파일)
+  - 검색 agent 프롬프트 파일 삭제 (4개 파일)
+  - 빈 파일 및 미사용 유틸리티 삭제 (3개 파일)
+  - 총 14개 파일 삭제 완료
 - **2026-01-15**: MVP 코드와 현재 프로젝트 비교 문서 작성
 - **2026-01-15**: SimpleSearchService 통합 완료
 - **2026-01-15**: 프론트엔드 UI에서 기술 메트릭 제거 (사용자 친화적 UI)
 - **2026-01-15**: `.gitignore` 파일 생성 (Git 저장소 준비)
+
+## 📋 삭제된 파일 전체 목록
+
+### 검색 워크플로우 관련 (7개 파일)
+1. `backend/src/app/agent/workflows/search_workflow.py`
+2. `backend/src/app/agent/nodes/search/query_understanding_node.py`
+3. `backend/src/app/agent/nodes/search/search_retrieve_node.py`
+4. `backend/src/app/agent/nodes/search/search_check_node.py`
+5. `backend/src/app/agent/nodes/search/search_web_node.py`
+6. `backend/src/app/agent/nodes/search/summarize_node.py`
+7. `backend/src/app/agent/nodes/search/__init__.py`
+
+### 검색 agent 프롬프트 파일 (4개 파일)
+8. `backend/src/app/prompts/policy_search_prompt.jinja2`
+9. `backend/src/app/prompts/grading_prompt.jinja2`
+10. `backend/src/app/services/policy_grading_prompt.jinja2`
+11. `backend/src/app/services/policy_search_prompt.jinja2`
+
+### 빈 파일 및 미사용 유틸리티 (3개 파일)
+12. `backend/src/app/services/template.py` (빈 파일)
+13. `backend/src/app/utils/template.py` (미사용 함수)
+14. `template.py` (프로젝트 루트, 미사용)
+
+**총 삭제된 파일**: 14개  
+**삭제 이유**: 검색 기능이 LLM 호출 없이 빠른 벡터 검색(`SimpleSearchService`)으로 전환되어 더 이상 필요하지 않음
 
 ---
 
