@@ -104,7 +104,7 @@
 </td>
 <td align="center">
   <sub><b>📌 데이터 수집 및 정제<br>
-  Eligibility Agent 설계<br>
+  Eligibility Agent 로직 설계<br>
   자격 검증 기능 구현</b></sub><br>
 </td>
 <td align="center">
@@ -112,8 +112,9 @@
   <sub>✅ 역할 추가 예정</sub><br>
 </td>
 <td align="center">
-  <sub><b>📌 담당 역할</b></sub><br>
-  <sub>✅ 역할 추가 예정</sub><br>
+  <sub><b>📌 데이터 정제 및 병합<br>
+  지원 대상 조건 분류 및 정형화<br>
+  Eligibility Agent 로직 설계 및 구현</b></sub><br>
 </td>
 </tr>
 </table>
