@@ -1,8 +1,115 @@
-# 정책·지원금 AI Agent (Policy & Grant AI Assistant)
+<p align="center">
+  <img
+    src="https://capsule-render.vercel.app/api?type=soft&height=200&text=🗂️%20정책·지원금%20AI%20Agent&fontSize=35&desc=3조%20SEARCHSPARK&descSize=22&descAlignY=70&color=gradient&customColorList=0,2,6,11,20&fontColor=ffffff&animation=fadeIn"
+    alt="정책 문서를 이해하고 답변하는 정책·지원금 AI Agent - 3조 SEARCHSPARK"
+  />
+</p>
 
-## 📋 프로젝트 개요
+<p align="center">
+  정부 정책·지원금 정보를 쉽게 탐색하고, **근거 기반 설명 + 자격 가능성 판단**까지 제공하는 AI 에이전트 웹 서비스입니다.
+</p>
 
-정부 정책·지원금 정보를 쉽게 탐색하고, **근거 기반 설명 + 자격 가능성 판단**까지 제공하는 AI 에이전트 웹 서비스입니다.
+<div align="center">
+  <a href="https://github.com/AIBootcamp16/langchain-llm-langchain-3">
+    <img src="https://img.shields.io/github/stars/AIBootcamp16/langchain-llm-langchain-3?style=social" alt="GitHub stars"/>
+  </a>
+  <a href="https://github.com/AIBootcamp16/langchain-llm-langchain-3">
+    <img src="https://img.shields.io/github/forks/AIBootcamp16/langchain-llm-langchain-3?style=social" alt="GitHub forks"/>
+  </a>
+</div>
+
+<br>
+
+## 👨‍👩‍👦‍👦 팀 구성원
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="200px">
+  <a href="https://github.com/moongs95"><img src="https://avatars.githubusercontent.com/moongs95" width="200px;" alt="권문진"/></a>
+</td>
+<td align="center" width="200px">
+  <a href="https://github.com/realtheai"><img src="https://avatars.githubusercontent.com/realtheai" width="200px;" alt="손은혜"/></a>
+</td>
+<td align="center" width="200px">
+  <a href="https://github.com/imeanseo"><img src="https://avatars.githubusercontent.com/imeanseo" width="200px;" alt="고민서"/></a>
+</td>
+<td align="center" width="200px">
+  <a href="https://github.com/parkjunsu3321"><img src="https://avatars.githubusercontent.com/parkjunsu3321" width="200px;" alt="박준수"/></a>
+</td>
+</tr>
+<tr>
+<td align="center"><a href="https://github.com/moongs95"><b>🌟 권문진</b></a></td>
+<td align="center"><a href="https://github.com/realtheai"><b>🌟 손은혜</b></a></td>
+<td align="center"><a href="https://github.com/imeanseo"><b>🌟 고민서</b></a></td>
+<td align="center"><a href="https://github.com/parkjunsu3321"><b>🌟 박준수</b></a></td>
+</tr>
+<tr>
+<td align="center">
+    <sub><b>📌 담당 역할</b></sub><br>
+    <sub>✅ 역할 추가 예정 </sub><br>
+</td>
+<td align="center">
+    <sub><b>📌 담당 역할</b></sub><br>
+    <sub>✅ 역할 추가 예정 </sub><br>
+</td>
+<td align="center">
+    <sub><b>📌 담당 역할</b></sub><br>
+    <sub>✅ 역할 추가 예정 </sub><br>
+</td>
+<td align="center">
+    <sub><b>📌 담당 역할</b></sub><br>
+    <sub>✅ 역할 추가 예정 </sub><br>
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td align="center" width="200px">
+  <a href="https://github.com/hopeplanting"><img src="https://avatars.githubusercontent.com/hopeplanting" width="200px;" alt="권효주"/></a>
+</td>
+<td align="center" width="200px">
+  <a href="https://github.com/Leesoomin97"><img src="https://avatars.githubusercontent.com/Leesoomin97" width="200px;" alt="이수민"/></a>
+</td>
+<td align="center" width="200px">
+  <a href="https://github.com/juny79"><img src="https://avatars.githubusercontent.com/juny79" width="200px;" alt="박준영"/></a>
+</td>
+<td align="center" width="200px">
+  <a href="https://github.com/yekyung821"><img src="https://avatars.githubusercontent.com/yekyung821" width="200px;" alt="허예경"/></a>
+</td>
+</tr>
+<tr>
+<td align="center"><a href="https://github.com/hopeplanting"><b>🌟 권효주</b></a></td>
+<td align="center"><a href="https://github.com/Leesoomin97"><b>🌟 이수민</b></a></td>
+<td align="center"><a href="https://github.com/juny79"><b>🌟 박준영</b></a></td>
+<td align="center"><a href="https://github.com/yekyung821"><b>🌟 허예경</b></a></td>
+</tr>
+<tr>
+<td align="center">
+    <sub><b>📌 담당 역할</b></sub><br>
+    <sub>✅ 역할 추가 예정 </sub><br>
+</td>
+<td align="center">
+    <sub><b>📌 담당 역할</b></sub><br>
+    <sub>✅ 역할 추가 예정 </sub><br>
+</td>
+<td align="center">
+    <sub><b>📌 담당 역할</b></sub><br>
+    <sub>✅ 역할 추가 예정 </sub><br>
+</td>
+<td align="center">
+    <sub><b>📌 담당 역할</b></sub><br>
+    <sub>✅ 역할 추가 예정 </sub><br>
+</td>
+</tr>
+</table>
+
+</div>
+
+<br>
+
 
 ### 주요 기능
 - 🔍 **하이브리드 검색**: Dense(BGE-M3) + Sparse(BM25) 검색, 지역/카테고리 필터링, 웹 검색 통합
