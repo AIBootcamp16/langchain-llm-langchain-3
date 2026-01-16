@@ -47,8 +47,7 @@
 </tr>
 <tr>
 <td align="center">
-    <sub><b>📌 담당 역할</b></sub><br>
-    <sub>✅ 역할 추가 예정 </sub><br>
+    <sub><b>📌 데이터 수집 및 전처리, 검색 시스템 구조 설계, 하이브리드 검색(RRF) 구현, 검색 품질 및 성능 개선</b></sub><br>
 </td>
 <td align="center">
     <sub><b>📌 기획, 아키텍처설계, DB, 백엔드/프론트엔드, QA Agent 설계, 코드 통합</b></sub><br>
