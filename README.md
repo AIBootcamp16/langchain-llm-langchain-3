@@ -88,8 +88,7 @@
     <sub><b>📌 Data수집정제, SearchAgent 설계-개발, 문제분석 및 성능개선</sub><br>
 </td>
 <td align="center">
-    <sub><b>📌 담당 역할</b></sub><br>
-    <sub>✅ 역할 추가 예정 </sub><br>
+    <sub><b>📌 데이터 수집 및 정제, Eligibility Agent 설계, 자격검증 기능 구현 </b></sub><br>
 </td>
 <td align="center">
     <sub><b>📌 담당 역할</b></sub><br>
