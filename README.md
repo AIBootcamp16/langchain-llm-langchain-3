@@ -86,7 +86,7 @@
 </tr>
 <tr>
 <td align="center">
-    <sub><b>📌 데이터 정제, SearchAgent설계-개발, 문제분석 및 성능개선</sub><br>
+    <sub><b>📌 데이터 정제, SearchAgent 설계-개발, 문제분석 및 성능개선</sub><br>
 </td>
 <td align="center">
     <sub><b>📌 담당 역할</b></sub><br>
