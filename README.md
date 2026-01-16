@@ -55,7 +55,6 @@
 ```bash
 # 레포지토리 클론
 git clone <repository-url>
-cd policy_agent_searchspark
 
 # 환경변수 설정
 cp env.example .env
