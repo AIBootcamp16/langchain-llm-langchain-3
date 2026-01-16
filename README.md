@@ -108,8 +108,8 @@
   자격 검증 기능 구현</b></sub><br>
 </td>
 <td align="center">
-  <sub><b>📌 담당 역할</b></sub><br>
-  <sub>✅ 역할 추가 예정</sub><br>
+  <sub><b>📌 데이터 모니터링 및 정제</b></sub><br>
+  <sub> QA Agent 품질 및 성능 테스트</sub><br>
 </td>
 <td align="center">
   <sub><b>📌 데이터 정제 및 병합<br>
