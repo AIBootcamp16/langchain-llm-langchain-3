@@ -314,9 +314,9 @@ solar_api_key: Optional[str] = Field(
 - `solar_client.py`를 통한 Solar LLM 통합
 - `llm_provider` 설정으로 선택 가능
 
-### 🗑️ 삭제된 파일 (사용되지 않아 제거됨)
+### 🗑️ 삭제되야 할 파일
 
-#### 20. `backend/src/app/agent/workflows/search_workflow.py` ❌ 삭제됨
+#### 20. `backend/src/app/agent/workflows/search_workflow.py` 
 - **삭제일**: 2026-01-15
 - **이유**: `SimpleSearchService`로 완전 대체되어 사용되지 않음
 - **이전 역할**: LangGraph 기반 Search Workflow 생성
@@ -327,7 +327,7 @@ solar_api_key: Optional[str] = Field(
 - `should_web_search()`: 충분성 검사 후 웹 검색 라우팅
 - `run_search_workflow()`: 워크플로우 실행 함수
 
-#### 21. `backend/src/app/agent/nodes/search/` 디렉토리 전체 ❌ 삭제됨
+#### 21. `backend/src/app/agent/nodes/search/` 디렉토리 전체 
 - **삭제일**: 2026-01-15
 - **이유**: `search_workflow.py`에서만 사용되었고, 해당 파일이 삭제됨
 - **이전 역할**: LangGraph 워크플로우용 검색 노드들
@@ -579,7 +579,6 @@ const response = await searchPolicies({ query, region, category });
 ## 📚 참고 문서
 
 - [README.md](./README.md): 프로젝트 전체 개요 및 새로운 검색 시스템 설명
-- [UNUSED_FILES.md](./UNUSED_FILES.md): 사용되지 않는 파일 목록 및 삭제 가이드
 - [backend/src/app/services/simple_search_service.py](./backend/src/app/services/simple_search_service.py): SimpleSearchService 구현
 - [backend/src/app/services/search_config.py](./backend/src/app/services/search_config.py): 검색 설정 파일
 
