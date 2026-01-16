@@ -109,7 +109,7 @@
 </td>
 <td align="center">
   <sub><b>📌 데이터 모니터링 및 정제</b></sub><br>
-  <sub> QA Agent 품질 및 성능 테스트</sub><br>
+  QA Agent 품질 및 성능 테스트<br>
 </td>
 <td align="center">
   <sub><b>📌 데이터 정제 및 병합<br>
